@@ -8,14 +8,14 @@ import {
   Alert,
   Modal,
 } from "react-native";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export const Register = (props) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name || !email || !password) {
       Alert.alert("Error", "All fields are required");
       return;
@@ -34,9 +34,9 @@ export const Register = (props) => {
     setModalVisible(true);  
     setTimeout(() => {
       setModalVisible(false);
-      props.navigation.navigate("Home");
+      props.navigation.navigate("Contact");
     }, 2000);
-
+    await AsyncStorage.setItem("name",name)
     setName("");
     setEmail("");
     setPassword("");

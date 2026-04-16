@@ -1,6 +1,10 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Button, Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 export const Home = (props) => {
+
+    const name = AsyncStorage.getItem("name")
+
   return (
     <View>
       <View style={styles.container}>
@@ -13,9 +17,9 @@ export const Home = (props) => {
         >
           <Text
             style={styles.button}
-            onPress={() => props.navigation.navigate("Register")}
+            onPress={() => name ? props.navigation.navigate("Contact") : props.navigation.navigate("Register")}
           >
-            Press To Register
+             {name ? "Continue" : "Press To Register"}
           </Text>
         </Pressable>
       </View>
