@@ -1,11 +1,11 @@
 import { Button, Image, StyleSheet, Text, View } from "react-native";
 
-export const Home = () => {
+export const Home = (props) => {
   return (
     <View>
       <View style={styles.container}>
         <Image style={styles.image} source={require("../assets/icon.png")} />
-        <Text   style={styles.button}  onPress={()=> console.warn("Button is Pressed!")}>Press To Register</Text>
+        <Text   style={styles.button}  onPress={()=> props.navigation.navigate("Register")}>Press To Register</Text>
       </View>
     </View>
   );
