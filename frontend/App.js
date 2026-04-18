@@ -103,27 +103,10 @@ export default function App() {
           }}
         />
         <Stack.Screen
-          name="CallScreen"
+          name="Call"
           component={CallScreen}
-          options={{
-            headerTitle: "Call",
-            headerTitleStyle: { fontFamily: "Fugaz" },
-
-            headerRight: () => (
-              <Text
-                style={{
-                  marginRight: 12,
-                  fontFamily: "Fugaz",
-                  backgroundColor:"#86e72bff",
-                  color:"#fff",
-                  paddingVertical: 5,
-                  paddingHorizontal: 12,
-                  borderRadius: 20,
-                }}
-              >{firstLetter}</Text>
-            ),
-          }}
-        />
+           headerShown={false}
+           />
       </Stack.Navigator>
     </NavigationContainer>
   );

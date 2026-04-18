@@ -38,8 +38,8 @@ const styles = StyleSheet.create({
   },
 
   image: {
-    width: 200,
-    height: 200,
+    width: 300,
+    height: 300,
     resizeMode: "contain",
   },
   button: {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     borderRadius: 10,
     paddingVertical: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 25,
   },
   buttonPressed: {
     opacity: 0.7,

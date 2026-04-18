@@ -113,7 +113,7 @@ export const Chat = (props) => {
               <Text style={styles.status}>Online</Text>
             </View>
 
-            <TouchableOpacity style={styles.callBtn} onPress={() => props.navigation.navigate("CallScreen")}>
+            <TouchableOpacity style={styles.callBtn} onPress={() => props.navigation.navigate("Call")}>
               <FontAwesome name="phone" size={18} color="#fff" />
             </TouchableOpacity>
           </Animated.View>
