@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StyleSheet, Text, View, Animated, TouchableOpacity } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 
-export const CallScreen = () => {
+export const CallScreen = (props) => {
   const [name, setName] = useState("User");
 
   const pulse = useRef(new Animated.Value(1)).current;
@@ -68,7 +68,7 @@ export const CallScreen = () => {
 
       {/* Call Actions */}
       <View style={styles.actions}>
-        <TouchableOpacity style={[styles.btn, { backgroundColor: "red" }]}>
+        <TouchableOpacity style={[styles.btn, { backgroundColor: "red" }]} onPress={()=> props.navigation.navigate("Chat")}>
           <FontAwesome name="phone" size={22} color="#fff" />
         </TouchableOpacity>
  
