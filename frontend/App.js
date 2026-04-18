@@ -94,7 +94,7 @@ export default function App() {
                   backgroundColor:"#86e72bff",
                   color:"#fff",
                   paddingVertical: 5,
-                  paddingHorizontal: 10,
+                  paddingHorizontal: 12,
                   borderRadius: 20,
                 }}
               >{firstLetter}</Text>

@@ -4,6 +4,8 @@ export const Chat =  () =>{
     return(
         <View>
     
+        
+
         </View>
     )
 }
