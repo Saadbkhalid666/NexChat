@@ -12,6 +12,7 @@ import * as SplashScreen from "expo-splash-screen";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Chat } from "./pages/chat";
+import { CallScreen } from "./pages/callSceen";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -84,6 +85,28 @@ export default function App() {
           component={Chat}
           options={{
             headerTitle: "Contacts",
+            headerTitleStyle: { fontFamily: "Fugaz" },
+
+            headerRight: () => (
+              <Text
+                style={{
+                  marginRight: 12,
+                  fontFamily: "Fugaz",
+                  backgroundColor:"#86e72bff",
+                  color:"#fff",
+                  paddingVertical: 5,
+                  paddingHorizontal: 12,
+                  borderRadius: 20,
+                }}
+              >{firstLetter}</Text>
+            ),
+          }}
+        />
+        <Stack.Screen
+          name="CallScreen"
+          component={CallScreen}
+          options={{
+            headerTitle: "Call",
             headerTitleStyle: { fontFamily: "Fugaz" },
 
             headerRight: () => (

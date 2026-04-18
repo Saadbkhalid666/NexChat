@@ -17,7 +17,7 @@ import {
   Easing,
 } from "react-native";
 
-export const Chat = () => {
+export const Chat = (props) => {
   const [name, setName] = useState("User");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -113,7 +113,7 @@ export const Chat = () => {
               <Text style={styles.status}>Online</Text>
             </View>
 
-            <TouchableOpacity style={styles.callBtn}>
+            <TouchableOpacity style={styles.callBtn} onPress={() => props.navigation.navigate("CallScreen")}>
               <FontAwesome name="phone" size={18} color="#fff" />
             </TouchableOpacity>
           </Animated.View>
