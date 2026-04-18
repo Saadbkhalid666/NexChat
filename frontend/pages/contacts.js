@@ -1,29 +1,19 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 
-export const Contact = () => {
+export const Contact = (props) => {
     const name = AsyncStorage.getItem("name")
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Contacts</Text>
 
       <View style={styles.contact}>
-        <Pressable style={({pressed}) => [styles.contact, pressed && styles.contactPressed]}>
+        <Pressable style={({pressed}) => [styles.contact, pressed && styles.contactPressed]} onPress={()=> props.navigation.navigate("Chat")} >
           <Text style={styles.contactText}>{name}</Text>
         </Pressable>
       </View>
-
-      <View style={styles.contact}>
-        <Pressable style={({pressed}) => [styles.contact, pressed && styles.contactPressed]}>
-          <Text style={styles.contactText}>Contact 2</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.contact}>
-        <Pressable style={({pressed}) => [styles.contact, pressed && styles.contactPressed]}>
-          <Text style={styles.contactText}>Contact 3</Text>
-        </Pressable>
-      </View>
+ 
+    
     </View>
   );
 };

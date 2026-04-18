@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Chat } from "./pages/chat";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -59,6 +60,28 @@ export default function App() {
         <Stack.Screen
           name="Contact"
           component={Contact}
+          options={{
+            headerTitle: "Contacts",
+            headerTitleStyle: { fontFamily: "Fugaz" },
+
+            headerRight: () => (
+              <Text
+                style={{
+                  marginRight: 12,
+                  fontFamily: "Fugaz",
+                  backgroundColor:"#86e72bff",
+                  color:"#fff",
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  borderRadius: 20,
+                }}
+              >{firstLetter}</Text>
+            ),
+          }}
+        />
+        <Stack.Screen
+          name="Chat"
+          component={Chat}
           options={{
             headerTitle: "Contacts",
             headerTitleStyle: { fontFamily: "Fugaz" },

@@ -47,8 +47,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
-    padding: 10,
     borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
   },
   buttonPressed: {
     opacity: 0.7,
