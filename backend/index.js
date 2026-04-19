@@ -15,6 +15,14 @@ app.use("/api/message", messageRoutes);
 
 dotenv.config();
 
+// Global Error Handler to catch malformed JSON and other errors
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ message: "Invalid JSON format in request body" });
+  }
+  next();
+});
+
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);
 });
