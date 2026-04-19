@@ -81,3 +81,9 @@ const deleteMessage = async (req,res) =>{
         });
     }
 }
+
+module.exports = {
+    sendMessage,
+    getMessage,
+    deleteMessage
+}
