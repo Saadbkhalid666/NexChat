@@ -82,7 +82,7 @@ const deleteMessage = async (req,res) =>{
     }
 }
 
-module.exports = {
+module.exports = { 
     sendMessage,
     getMessage,
     deleteMessage
