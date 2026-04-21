@@ -41,5 +41,14 @@ const deleteUser = async (req,res) => {
     }
 }
 
+const getUsers = async (req,res) => {
+    try{
 
-module.exports = {getMessage,deleteMessage,updateUser,deleteUser}
+        const users = User.find()
+        res.status(200).json({message:"User Fetched Successfully!", usrers})
+    }catch (error){
+        res.status(500).json({message:"Internal Server Error!", error: error.message})
+    }
+}
+
+module.exports = {getMessage,deleteMessage,updateUser,deleteUser,getUsers}
