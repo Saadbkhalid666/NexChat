@@ -9,30 +9,34 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [selectedChat, setSelectedChat] = useState(null);
-  const [loading, setLoading] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(async () => {
-    const storedUser = await AsyncStorage.getItem("user");
-    const storedToken = await AsyncStorage.getItem("token");
+ useEffect(() => {
+  const loadData = async () => {
+    try {
+      const storedUser = await AsyncStorage.getItem("user");
+      const storedToken = await AsyncStorage.getItem("token");
 
-    if (storedUser && storedToken) {
-      try {
+      if (storedUser && storedToken) {
         setUser(JSON.parse(storedUser));
         setToken(storedToken);
-      } catch (error) {
-        console.error("Error parsing user from localStorage", err);
+      } else {
         setUser(null);
         setToken(null);
-        await AsyncStorage.removeItem("user");
-       await AsyncStorage.removeItem("token");
       }
-    } else {
+    } catch (error) {
+      console.error("Storage load error:", error);
       setUser(null);
       setToken(null);
+      await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("token");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, []);
+  };
 
+  loadData();
+}, []);
   return (
     <UserContext.Provider
       value={{

@@ -12,6 +12,7 @@ import {
 import api from "../axios";
 
 import { UserContext } from "../context/UserContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 export const SignUp = (props) => {
   const { setUser, setToken } = useContext(UserContext);
   const [name, setName] = useState("");
@@ -44,8 +45,9 @@ export const SignUp = (props) => {
         email,
         password,
       });
+console.log("DATA SENT:", { name, email, password });
 
-      if (res.data.success) {
+      if (res.status === 201) {
         setUser(res.data.user);
         setToken(res.data.token);
 
@@ -54,13 +56,21 @@ export const SignUp = (props) => {
 
         setModalVisible(true);
 
+        setName("");
+        setEmail("");
+        setPassword("");
+        
         setTimeout(() => {
           setModalVisible(false);
           props.navigation.navigate("Contact");
         }, 1500);
       }
     } catch (error) {
-      Alert.alert("Error", "Registration failed");
+      console.log("REGISTER ERROR:", error?.response?.data || error.message);
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message || "Registration failed",
+      );
     } finally {
       setSending(false);
     }

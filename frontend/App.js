@@ -13,6 +13,7 @@ import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Chat } from "./pages/chat";
 import { CallScreen } from "./pages/callSceen";
+import { UserProvider } from "./context/UserContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -44,6 +45,8 @@ export default function App() {
   if (!loaded) return null;
 
   return (
+    <UserProvider>
+
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
@@ -109,5 +112,6 @@ export default function App() {
            />
       </Stack.Navigator>
     </NavigationContainer>
+    </UserProvider>
   );
 }

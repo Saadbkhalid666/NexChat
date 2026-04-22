@@ -95,6 +95,6 @@ app.use((err, req, res, next) => {
   next();
 });
 
-server.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, "192.168.1.8", () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });
