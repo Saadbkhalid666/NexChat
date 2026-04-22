@@ -9,11 +9,11 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import api from "../axios"
+import api from "../axios";
 
 import { UserContext } from "../context/UserContext";
 export const SignUp = (props) => {
-  const { setUser } = useContext(UserContext);
+  const { setUser, setToken } = useContext(UserContext);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,37 +38,32 @@ export const SignUp = (props) => {
 
     setSending(true);
 
-
-    setModalVisible(true);
-    setTimeout(() => {
-      setModalVisible(false);
-      props.navigation.navigate("Contact");
-    }, 2000);
-
-    try{
-      const res = await api("/user/register",{
+    try {
+      const res = await api.post("/user/register", {
         name,
         email,
-        password
-      })
-      if(res.data.success){
+        password,
+      });
+
+      if (res.data.success) {
         setUser(res.data.user);
-        await AsyncStorage.setItem("name", res.data.user.name);
-        await AsyncStorage.setItem("email", res.data.user.email);
-        await AsyncStorage.setItem("password", res.data.user.password);
-        await AsyncStorage.setItem("token", res.data.user.token);
-        props.navigation.navigate("Contact");
+        setToken(res.data.token);
+
+        await AsyncStorage.setItem("user", JSON.stringify(res.data.user));
+        await AsyncStorage.setItem("token", res.data.token);
+
+        setModalVisible(true);
+
+        setTimeout(() => {
+          setModalVisible(false);
+          props.navigation.navigate("Contact");
+        }, 1500);
       }
-    }catch(error){
-      console.log(error);
+    } catch (error) {
       Alert.alert("Error", "Registration failed");
-    } finally{
+    } finally {
       setSending(false);
     }
-
-
-
-     
   };
 
   return (
@@ -116,8 +111,11 @@ export const SignUp = (props) => {
           styles.button,
           pressed && styles.buttonPressed,
         ]}
+        disabled={sending}
       >
-        <Text style={styles.buttonText}>Register</Text>
+        <Text style={styles.buttonText}>
+          {sending ? "Registering..." : "Register"}
+        </Text>
       </Pressable>
     </View>
   );

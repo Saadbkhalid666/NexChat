@@ -13,10 +13,10 @@ export const Home = (props) => {
             styles.button,
             pressed && styles.buttonPressed,
           ]}
+          onPress={() => props.navigation.navigate("SignUp")}
         >
           <Text
             style={styles.button}
-            onPress={() => props.navigation.navigate("Register")}
           >
             Register
           </Text>
