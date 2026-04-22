@@ -3,7 +3,6 @@ import { Button, Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 export const Home = (props) => {
 
-    const name = AsyncStorage.getItem("name")
 
   return (
     <View>
@@ -17,9 +16,9 @@ export const Home = (props) => {
         >
           <Text
             style={styles.button}
-            onPress={() => name ? props.navigation.navigate("Contact") : props.navigation.navigate("Register")}
+            onPress={() => props.navigation.navigate("Register")}
           >
-             {name ? "Continue" : "Press To Register"}
+            Register
           </Text>
         </Pressable>
       </View>

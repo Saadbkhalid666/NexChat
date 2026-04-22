@@ -8,7 +8,6 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 export const Register = (props) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -36,7 +35,6 @@ export const Register = (props) => {
       setModalVisible(false);
       props.navigation.navigate("Contact");
     }, 2000);
-    await AsyncStorage.setItem("name",name)
     setName("");
     setEmail("");
     setPassword("");
