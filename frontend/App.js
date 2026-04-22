@@ -1,6 +1,6 @@
 import { Text } from "react-native";
 import { Home } from "./pages/Home";
-import { Register } from "./pages/Register";
+import { SignUp } from "./pages/Signup";
 import { Contact } from "./pages/contacts";
 
 import { createStackNavigator } from "@react-navigation/stack";
@@ -53,8 +53,8 @@ export default function App() {
         />
 
         <Stack.Screen
-          name="Register"
-          component={Register}
+          name="SignUp"
+          component={SignUp}
           options={{ headerShown: false }}
         />
 

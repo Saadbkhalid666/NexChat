@@ -8,7 +8,7 @@ import {
   Alert,
   Modal,
 } from "react-native";
-export const Register = (props) => {
+export const SignUp = (props) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
