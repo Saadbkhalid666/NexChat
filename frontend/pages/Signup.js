@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import { useState } from "react";
 import {
   StyleSheet,
@@ -8,11 +9,16 @@ import {
   Alert,
   Modal,
 } from "react-native";
+import api from "../axios"
+
+import { UserContext } from "../context/UserContext";
 export const SignUp = (props) => {
+  const { setUser } = useContext(UserContext);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const handleRegister = async () => {
     if (!name || !email || !password) {
@@ -30,29 +36,48 @@ export const SignUp = (props) => {
       return;
     }
 
-    setModalVisible(true);  
+    setSending(true);
+
+
+    setModalVisible(true);
     setTimeout(() => {
       setModalVisible(false);
       props.navigation.navigate("Contact");
     }, 2000);
-    setName("");
-    setEmail("");
-    setPassword("");
+
+    try{
+      const res = await api("/user/register",{
+        name,
+        email,
+        password
+      })
+      if(res.data.success){
+        setUser(res.data.user);
+        await AsyncStorage.setItem("name", res.data.user.name);
+        await AsyncStorage.setItem("email", res.data.user.email);
+        await AsyncStorage.setItem("password", res.data.user.password);
+        await AsyncStorage.setItem("token", res.data.user.token);
+        props.navigation.navigate("Contact");
+      }
+    }catch(error){
+      console.log(error);
+      Alert.alert("Error", "Registration failed");
+    } finally{
+      setSending(false);
+    }
+
+
+
+     
   };
 
   return (
     <View style={styles.container}>
-
       {/* Modal */}
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="fade"
-      >
+      <Modal visible={modalVisible} transparent={true} animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalBox}>
             <Text style={styles.modalText}>Registration Successful</Text>
- 
           </View>
         </View>
       </Modal>
@@ -163,9 +188,8 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 15,
     fontFamily: "Fugaz",
-    color:"white"
+    color: "white",
   },
-
 
   closeText: {
     color: "#fff",
