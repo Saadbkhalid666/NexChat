@@ -14,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Chat } from "./pages/chat";
 import { CallScreen } from "./pages/callSceen";
 import { UserProvider } from "./context/UserContext";
+import { Login } from "./pages/Login";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -58,6 +59,11 @@ export default function App() {
         <Stack.Screen
           name="SignUp"
           component={SignUp}
+          options={{ headerShown: false }}
+        />
+         <Stack.Screen
+          name="Login"
+          component={Login}
           options={{ headerShown: false }}
         />
 
