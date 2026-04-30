@@ -3,6 +3,7 @@ const app = express();
 const dotenv = require("dotenv");
 const http = require("http");
 const { Server } = require("socket.io");
+const cors = require("cors");
 
 // Load env FIRST
 dotenv.config();
@@ -21,6 +22,10 @@ const adminRoutes = require("./routes/dashboardRoutes.js");
 connectDB();
 
 app.use(express.json());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"]
+}));
 
 const server = http.createServer(app);
 
@@ -95,6 +100,6 @@ app.use((err, req, res, next) => {
   next();
 });
 
-server.listen(process.env.PORT, "192.168.1.8", () => {
+server.listen(process.env.PORT, "192.168.1.10", () => {
   console.log(`Server running on port ${process.env.PORT}`);
 });

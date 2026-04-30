@@ -66,12 +66,31 @@ console.log("DATA SENT:", { name, email, password });
         }, 1500);
       }
     } catch (error) {
-      console.log("REGISTER ERROR:", error?.response?.data || error.message);
-      Alert.alert(
-        "Error",
-        error?.response?.data?.message || "Registration failed",
-      );
-    } finally {
+  console.log("AXIOS ERROR:", error);
+
+  if (error.response) {
+    console.log("STATUS:", error.response.status);
+    console.log("DATA:", error.response.data);
+
+    Alert.alert(
+      "Error",
+      error.response.data?.message || "Server error"
+    );
+
+  } else if (error.request) {
+    console.log("NO RESPONSE:", error.request);
+
+    Alert.alert(
+      "Error",
+      "Server not reachable (check IP / backend)"
+    );
+
+  } else {
+    console.log("ERROR MESSAGE:", error.message);
+
+    Alert.alert("Error", error.message);
+  }
+}finally {
       setSending(false);
     }
   };
