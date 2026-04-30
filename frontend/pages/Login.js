@@ -1,62 +1,61 @@
-import { Text, View } from "react-native"
-import { useFocusEffect } from "@react-navigation/native"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useState } from "react"
-import jwtDecode from "jwt-decode"
-import { API_URL } from "../config/api"
+import { Text, View, Button, TextInput, Alert } from "react-native";
+import { useContext, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserContext } from "../context/UserContext";
+import api from "../axios";
 
-export const Login  = () => {
+export const Login = (props) => {
+  const { setUser } = useContext(UserContext);
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const [error, setError] = useState("")
-    const [loading, setLoading] = useState(false)
+  const togglePassword = () => {
+    setShowPassword(!showPassword);
+  };
 
-    const handleLogin = async () => {
-        setLoading(true)
-        setError("")
+  const handleLogin = async () => {
+    if (!email || !password)
+      return Alert.alert("error", "All Fields are Required!");
+    if (!email.includes("@") || !email.endsWith("gmail.com"))
+      return Alert.alert("error", "Invalid Email");
 
-        const res = await fetch(`${API_URL}/api/auth/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password })
-        })
+    setLoading(true);
 
-        const data = await res.json()
+    try {
+      const res = await api.post("/user/login", {
+        email,
+        password,
+      });
 
-        if (res.ok) {
-            await AsyncStorage.setItem("token", data.token)
-            props.navigation.replace("Contact")
-        } else {
-            setError(data.message || "Login failed")
-        }
+      const { token, user } = res.data;
 
-        setLoading(false)
+      if (token) {
+        setUser(user);
+        setToken(token);
+        await AsyncStorage.setItem("token", token);
+        await AsyncStorage.setItem("user", JSON.stringify(user));
+        setLoading(false);
+        props.navigation.navigate("Contact");
+      }
+    } catch (err) {
+      console.log("AXIOS ERROR:", err);
+
+      if (err.response) {
+        console.log("STATUS:", err.response.status);
+        console.log("DATA:", error.response.data);
+
+        Alert.alert("Error", error.response.data?.message || "Server error");
+      } else if (error.request) {
+        console.log("NO RESPONSE:", error.request);
+
+        Alert.alert("Error", "Server not reachable (check IP / backend)");
+      } else {
+        console.log("ERROR MESSAGE:", error.message);
+        
+        Alert.alert("Error", error.message);
+      }
     }
-   
-   
-   
-   
-   return <View> 
-    
-    <TextInput
-    style={styles.input}
-    placeholder="Email"
-    value={email}
-    onChangeText={setEmail}
-/>
-<TextInput
-    style={styles.input}
-    placeholder="Password"
-    value={password}
-    onChangeText={setPassword}
-/>
-<Button
-    title={loading ? "Logging In..." : "Login"}
-    onPress={handleLogin}
-    disabled={loading}
-/>
-
-        <Text>Hello How are You?</Text>
-    </View>
-}
+  };
+};
