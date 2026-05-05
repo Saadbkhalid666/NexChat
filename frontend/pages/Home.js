@@ -17,29 +17,30 @@ export const Home = (props) => {
   );
 
   const checkAuth = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
+  try {
+    const token = await AsyncStorage.getItem("token");
 
-      if (!token) {
-        setAuthStatus("first_time");
-        return;
-      }
-
-      const decoded = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-
-      if (decoded.exp < currentTime) {
-        await AsyncStorage.removeItem("token");
-        setAuthStatus("expired");
-      } else {
-        props.navigation.navigate("Contact");
-      }
-
-    } catch (err) {
-      console.log("Auth Check Error:", err);
-      setAuthStatus("expired");
+    if (!token) {
+      setAuthStatus("first_time");
+      return;
     }
-  };
+
+    const decoded = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+
+    if (decoded.exp < currentTime) {
+      await AsyncStorage.removeItem("token");
+      setAuthStatus("expired");
+    } else {
+      setAuthStatus("authenticated");
+      props.navigation.replace("Contact"); // better than navigate
+    }
+
+  } catch (err) {
+    console.log("Auth Check Error:", err);
+    setAuthStatus("expired");
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -57,7 +58,7 @@ export const Home = (props) => {
         </Pressable>
       )}
 
-{authStatus !== "expired" && (
+{authStatus === "authenticated" && (
         <Pressable
           style={({ pressed }) => [
             styles.button,
