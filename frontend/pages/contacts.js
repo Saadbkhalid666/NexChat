@@ -45,7 +45,6 @@ export const Contact = (props) => {
   }, []);
 
   const handleUserClick = (selected) => {
-    setSelectedUser(selected);
     props.navigation.navigate("Chat", {
       selectedUser: selected,
     });

@@ -30,28 +30,29 @@ const sendMessage = async (req, res) => {
 }
 
 const getMessage = async (req, res) => {
-    try {
-        const { sender, receiver } = req.body;
+  try {
+    const { sender, receiver } = req.query;
 
-        if (!sender || !receiver) {
-            return res.status(400).json({
-                message: "All fields are required"
-            });
-        }
-
-        const messages = await Message.find({
-            sender,
-            receiver
-        });
-
-        res.status(200).json(messages);
-
-    } catch (e) {
-        res.status(500).json({
-            message: e.message
-        });
+    if (!sender || !receiver) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
-}
+
+    const messages = await Message.find({
+      $or: [
+        { sender, receiver },
+        { sender: receiver, receiver: sender }, 
+      ],
+    }).sort({ createdAt: 1 });
+
+    res.status(200).json(messages);
+  } catch (e) {
+    res.status(500).json({
+      message: e.message,
+    });
+  }
+};
 
 const deleteMessage = async (req,res) =>{
     try {
