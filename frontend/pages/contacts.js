@@ -33,11 +33,7 @@ export const Contact = (props) => {
             Authorization: `Bearer ${token}`,
           },
         });
-        // Filter out the currently logged-in user
-        const otherUsers = res.data.filter(
-          (u) => u._id !== user?._id && u.id !== user?.id
-        );
-        setUsers(otherUsers);
+        setUsers(res.data);
         setLoading(false);
       } catch (err) {
         console.log(err);

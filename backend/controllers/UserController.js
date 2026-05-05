@@ -63,11 +63,10 @@ const registerUser = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const currentUserId = req.params.id;
-    console.log(currentUserId);
+    const currentUserId = req.user.id;
 
     const users = await User.find(
-      { _id: { $ne: currentUserId } }, // exclude current user
+      { _id: { $ne: currentUserId } },
       "-password"
     );
 
