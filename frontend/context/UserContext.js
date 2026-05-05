@@ -10,6 +10,7 @@ export const UserProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [selectedChat, setSelectedChat] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null)
 
  useEffect(() => {
   const loadData = async () => {
@@ -47,6 +48,8 @@ export const UserProvider = ({ children }) => {
         selectedChat,
         setSelectedChat,
         loading,
+        selectedUser,
+        setSelectedUser
       }}
     >
       {children}

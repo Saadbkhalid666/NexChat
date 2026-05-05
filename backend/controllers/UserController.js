@@ -28,7 +28,7 @@ const registerUser = async (req, res) => {
       username: name,
       email,
       password,
-      role:"admin"
+      role:"user"
     });
 
     await newUser.save();
@@ -63,9 +63,15 @@ const registerUser = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    const user = await User.find();
+    const currentUserId = req.params.id;
+    console.log(currentUserId);
 
-    res.status(200).json(user);
+    const users = await User.find(
+      { _id: { $ne: currentUserId } }, // exclude current user
+      "-password"
+    );
+
+    res.status(200).json(users);
 
   } catch (e) {
     res.status(500).json({

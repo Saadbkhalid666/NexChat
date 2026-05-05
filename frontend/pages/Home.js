@@ -2,13 +2,10 @@ import { useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import jwtDecode from "jwt-decode";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 
 export const Home = (props) => {
   const [authStatus, setAuthStatus] = useState("loading");
-
-    AsyncStorage.removeItem("user")
-    AsyncStorage.removeItem("token")
 
   useFocusEffect(
     useCallback(() => {
@@ -16,7 +13,7 @@ export const Home = (props) => {
     }, [])
   );
 
-  const checkAuth = async () => {
+const checkAuth = async () => {
   try {
     const token = await AsyncStorage.getItem("token");
 
@@ -25,7 +22,15 @@ export const Home = (props) => {
       return;
     }
 
-    const decoded = jwtDecode(token);
+    let decoded;
+    try {
+      decoded = jwtDecode(token);
+    } catch {
+      await AsyncStorage.removeItem("token");
+      setAuthStatus("first_time");
+      return;
+    }
+
     const currentTime = Date.now() / 1000;
 
     if (decoded.exp < currentTime) {
@@ -33,18 +38,22 @@ export const Home = (props) => {
       setAuthStatus("expired");
     } else {
       setAuthStatus("authenticated");
-      props.navigation.replace("Contact"); // better than navigate
+      props.navigation.replace("Contact");
     }
 
   } catch (err) {
     console.log("Auth Check Error:", err);
-    setAuthStatus("expired");
+    setAuthStatus("first_time"); 
   }
 };
 
   return (
     <View style={styles.container}>
       <Image style={styles.image} source={require("../assets/icon.png")} />
+
+      {authStatus === "loading" && (
+        <ActivityIndicator size="large" color="#86e72bff" />
+      )}
 
       {authStatus === "first_time" && (
         <Pressable
@@ -58,28 +67,28 @@ export const Home = (props) => {
         </Pressable>
       )}
 
-{authStatus === "authenticated" && (
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            pressed && styles.buttonPressed,
-            { marginTop: 10 }
-          ]}
-          onPress={() => props.navigation.navigate("Contact")}
-        >
-          <Text style={styles.buttonText}>Contacts</Text>
-        </Pressable>
-      )}
       {authStatus === "expired" && (
         <Pressable
           style={({ pressed }) => [
             styles.button,
             pressed && styles.buttonPressed,
-            { marginTop: 10 }
           ]}
           onPress={() => props.navigation.navigate("Login")}
         >
           <Text style={styles.buttonText}>Login</Text>
+        </Pressable>
+      )}
+
+      {/* Optional fallback if navigation fails */}
+      {authStatus === "authenticated" && (
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={() => props.navigation.replace("Contact")}
+        >
+          <Text style={styles.buttonText}>Go to Contacts</Text>
         </Pressable>
       )}
     </View>

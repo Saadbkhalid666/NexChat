@@ -27,9 +27,8 @@ export const Chat = (props) => {
 
   useEffect(() => {
     const init = async () => {
-      const stored = await AsyncStorage.getItem("name");
-      if (stored) setName(stored);
-
+      const { selectedUser } = props.route.params;
+      setName(selectedUser.username);
       await fetchMessages();
     };
 

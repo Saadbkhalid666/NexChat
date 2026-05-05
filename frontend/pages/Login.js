@@ -36,11 +36,11 @@ export const Login = (props) => {
       if (token) {
         setUser(user);
         setToken(token);
-        await AsyncStorage.setItem("token", token);
+       await AsyncStorage.setItem("token", token);
         await AsyncStorage.setItem("user", JSON.stringify(user));
    
         setLoading(false);
-        props.navigation.navigate("Contact");
+        props.navigation.replace("Contact");
       }
     } catch (err) {
       setLoading(false);

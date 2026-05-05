@@ -10,4 +10,3 @@ router.get('/get-users',authMiddleware, getUser)
 
 
 module.exports = router
-
