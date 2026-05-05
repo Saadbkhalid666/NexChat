@@ -16,6 +16,7 @@ import {
   Keyboard,
   Easing,
 } from "react-native";
+import api from "../axios";
 
 export const Chat = (props) => {
   const [name, setName] = useState("User");
@@ -48,13 +49,17 @@ export const Chat = (props) => {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
-
+  }, []); 
+  const token = AsyncStorage.getItem("token");
   const fetchMessages = async () => {
     try {
-      const res = await fetch("YOUR_API_URL/messages");
-      const data = await res.json();
-      setMessages(data);
+      const res = await api.get("/message/get",{
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setMessages(res.data);
     } catch (err) {
       console.log("Fetch messages error:", err);
     }
@@ -64,15 +69,15 @@ export const Chat = (props) => {
     if (!message.trim()) return;
 
     try {
-      await fetch("YOUR_API_URL/messages", {
-        method: "POST",
+      await api.post("/message/send", {
+          text: message,
+          recieverId: name,
+      },
+      {
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          text: message,
-          sender: name,
-        }),
       });
 
       setMessage("");

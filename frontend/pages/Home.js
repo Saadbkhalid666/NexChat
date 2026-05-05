@@ -15,10 +15,19 @@ export const Home = (props) => {
 
 const checkAuth = async () => {
   try {
+    const hasLaunched = await AsyncStorage.getItem("has_launched");
+
+    if (!hasLaunched) {
+      // First time the user opens the app
+      await AsyncStorage.setItem("has_launched", "true");
+      setAuthStatus("first_time");
+      return;
+    }
+
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
-      setAuthStatus("first_time");
+      setAuthStatus("expired");
       return;
     }
 
@@ -27,7 +36,7 @@ const checkAuth = async () => {
       decoded = jwtDecode(token);
     } catch {
       await AsyncStorage.removeItem("token");
-      setAuthStatus("first_time");
+      setAuthStatus("expired");
       return;
     }
 
@@ -43,7 +52,7 @@ const checkAuth = async () => {
 
   } catch (err) {
     console.log("Auth Check Error:", err);
-    setAuthStatus("first_time"); 
+    setAuthStatus("expired"); 
   }
 };
 
@@ -56,7 +65,7 @@ const checkAuth = async () => {
       )}
 
       {authStatus === "first_time" && (
-        <Pressable
+        <Pressable 
           style={({ pressed }) => [
             styles.button,
             pressed && styles.buttonPressed,
