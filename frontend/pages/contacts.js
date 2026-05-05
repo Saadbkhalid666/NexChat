@@ -2,7 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StyleSheet, Text, View, Pressable } from "react-native";
 
 export const Contact = (props) => {
-    const name = AsyncStorage.getItem("name")
+
+ const name = AsyncStorage.getItem("name");
+console.log(name)
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Contacts</Text>

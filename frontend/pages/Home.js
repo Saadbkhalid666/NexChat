@@ -7,6 +7,9 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 export const Home = (props) => {
   const [authStatus, setAuthStatus] = useState("loading");
 
+    AsyncStorage.removeItem("user")
+    AsyncStorage.removeItem("token")
+
   useFocusEffect(
     useCallback(() => {
       checkAuth();
@@ -29,7 +32,7 @@ export const Home = (props) => {
         await AsyncStorage.removeItem("token");
         setAuthStatus("expired");
       } else {
-        props.navigation.replace("Contact");
+        props.navigation.navigate("Contact");
       }
 
     } catch (err) {
@@ -42,7 +45,7 @@ export const Home = (props) => {
     <View style={styles.container}>
       <Image style={styles.image} source={require("../assets/icon.png")} />
 
-      {authStatus !== "loading" && authStatus !== "expired" && (
+      {authStatus === "first_time" && (
         <Pressable
           style={({ pressed }) => [
             styles.button,
@@ -54,7 +57,19 @@ export const Home = (props) => {
         </Pressable>
       )}
 
-      {authStatus !== "loading" && (
+{authStatus !== "expired" && (
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+            { marginTop: 10 }
+          ]}
+          onPress={() => props.navigation.navigate("Contact")}
+        >
+          <Text style={styles.buttonText}>Contacts</Text>
+        </Pressable>
+      )}
+      {authStatus === "expired" && (
         <Pressable
           style={({ pressed }) => [
             styles.button,

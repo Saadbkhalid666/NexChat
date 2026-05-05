@@ -53,6 +53,7 @@ console.log("DATA SENT:", { name, email, password });
 
         await AsyncStorage.setItem("user", JSON.stringify(res.data.user));
         await AsyncStorage.setItem("token", res.data.token);
+        await AsyncStorage.setItem("name", name);
 
         setModalVisible(true);
 

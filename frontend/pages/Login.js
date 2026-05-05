@@ -38,6 +38,7 @@ export const Login = (props) => {
         setToken(token);
         await AsyncStorage.setItem("token", token);
         await AsyncStorage.setItem("user", JSON.stringify(user));
+   
         setLoading(false);
         props.navigation.navigate("Contact");
       }
