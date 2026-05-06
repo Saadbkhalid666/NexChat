@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import jwtDecode from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import { Image, Pressable, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 
 export const Home = (props) => {
@@ -35,7 +35,7 @@ const checkAuth = async () => {
     try {
       decoded = jwtDecode(token);
     } catch (e) {
-      console.error("JWT Decode Error:", e);
+      console.log("JWT Decode Error:", e);
       await AsyncStorage.removeItem("token");
       setAuthStatus("expired");
       return;
