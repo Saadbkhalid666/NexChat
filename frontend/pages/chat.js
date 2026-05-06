@@ -22,14 +22,18 @@ import socket from "../socket";
 
 
 export const Chat = (props) => {
+  const {id} = props.route.params.selectedUser
   const [name, setName] = useState("User");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const flatListRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
 
   const fade = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(30)).current;
+
+  const roomId = [currentUser.id, id].sort().join("_");
 
   useEffect(() => {
     const init = async () => {
@@ -44,6 +48,23 @@ export const Chat = (props) => {
     };
 
     init();
+
+    useEffect(()=>{
+      
+      socket.emit("join_room", roomId);
+      socket.on("receiveMessage", (msg) => {
+        setMessage(prev => [...prev, msg])
+      })
+
+      socket.on("showTyping", () => setIsTyping(true))
+      socket.on("hideTyping", () => setIsTyping(false))
+
+      return () => {
+        socket.off("receiveMessage")
+        socket.off("showTyping")
+        socket.off("hideTyping")
+      }
+    }, [roomId])
 
     Animated.parallel([
       Animated.timing(fade, {
