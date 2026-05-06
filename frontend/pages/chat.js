@@ -11,31 +11,25 @@ import {
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
+  Platform,
   TouchableWithoutFeedback,
   Keyboard,
   Easing,
 } from "react-native";
-import api from "../axios";
 
 export const Chat = (props) => {
-  const selectedUser = props.route?.params?.selectedUser;
-
+  const [name, setName] = useState("User");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
 
   const fade = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(30)).current;
 
-  // ✅ INIT
   useEffect(() => {
     const init = async () => {
-      const userData = await AsyncStorage.getItem("user");
-      const parsedUser = JSON.parse(userData);
-
-      setCurrentUser(parsedUser);
-
-      await fetchMessages(parsedUser, selectedUser);
+      const { selectedUser } = props.route.params;
+      setName(selectedUser.username);
+      await fetchMessages();
     };
 
     init();
@@ -43,87 +37,63 @@ export const Chat = (props) => {
     Animated.parallel([
       Animated.timing(fade, {
         toValue: 1,
-        duration: 500,
+        duration: 700,
+        easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
       Animated.timing(slide, {
         toValue: 0,
-        duration: 500,
+        duration: 700,
+        easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }),
     ]).start();
   }, []);
 
-  // ✅ FETCH MESSAGES
-  const fetchMessages = async (me, other) => {
+  const fetchMessages = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      const res = await api.get("/message/get", {
-        params: {
-          sender: me._id,
-          receiver: other._id,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setMessages(res.data);
+      const res = await fetch("YOUR_API_URL/messages");
+      const data = await res.json();
+      setMessages(data);
     } catch (err) {
-      console.log("Fetch error:", err.response?.data || err);
+      console.log("Fetch messages error:", err);
     }
   };
 
-  // ✅ SEND MESSAGE
   const sendMessage = async () => {
     if (!message.trim()) return;
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      await api.post(
-        "/message/send",
-        {
-          sender: currentUser._id,
-          receiver: selectedUser._id,
-          message: message,
+      await fetch("YOUR_API_URL/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+        body: JSON.stringify({
+          text: message,
+          sender: name,
+        }),
+      });
 
       setMessage("");
-      fetchMessages(currentUser, selectedUser);
+      await fetchMessages();
     } catch (err) {
-      console.log("Send error:", err.response?.data || err);
+      console.log("Send message error:", err);
     }
   };
 
-  // ✅ MESSAGE RENDER
-  const renderItem = ({ item }) => {
-    const isMine = item.sender === currentUser?._id;
-
-    return (
-      <View style={[styles.bubble, isMine ? styles.mine : styles.other]}>
-        <Text style={styles.bubbleText}>{item.message}</Text>
-      </View>
-    );
-  };
-
-  if (!selectedUser) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>No user selected</Text>
-      </View>
-    );
-  }
+  const renderItem = ({ item }) => (
+    <View style={[styles.bubble, item.mine ? styles.mine : styles.other]}>
+      <Text style={styles.bubbleText}>{item.text}</Text>
+    </View>
+  );
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior="padding"
+      keyboardVerticalOffset={90}
+    >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <SafeAreaView style={styles.screen}>
           {/* HEADER */}
@@ -133,36 +103,54 @@ export const Chat = (props) => {
               { opacity: fade, transform: [{ translateY: slide }] },
             ]}
           >
-            <Text style={styles.name}>{selectedUser.username}</Text>
+            <View style={styles.profileWrap}>
+              <FontAwesome name="user" size={22} color="#111" />
+            </View>
+
+            <View>
+              <Text style={styles.name}>{name}</Text>
+              <Text style={styles.status}>Online</Text>
+            </View>
+
+            <TouchableOpacity style={styles.callBtn} onPress={() => props.navigation.navigate("Call")}>
+              <FontAwesome name="phone" size={18} color="#fff" />
+            </TouchableOpacity>
           </Animated.View>
-
-          {/* MESSAGES */}
-          <FlatList
-            data={messages}
-            keyExtractor={(item) => item._id.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={styles.list}
-          />
-
-          {/* INPUT */}
-          <View style={styles.inputBar}>
-            <TextInput
-              value={message}
-              onChangeText={setMessage}
-              placeholder="Type message..."
-              placeholderTextColor="#777"
-              style={styles.input}
+          <View style={{ flex: 1 }}>
+            {/* MESSAGES */}
+            <FlatList
+              data={messages}
+              keyExtractor={(item) => item.id?.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={styles.list}
+              keyboardShouldPersistTaps="handled"
             />
 
-            <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
-              <FontAwesome name="send" size={18} color="#fff" />
-            </TouchableOpacity>
+            {/* INPUT */}
+            <View style={styles.inputBar}>
+              <TouchableOpacity>
+                <FontAwesome name="smile-o" size={22} color="#888" />
+              </TouchableOpacity>
+
+              <TextInput
+                value={message}
+                onChangeText={setMessage}
+                placeholder="Type message..."
+                placeholderTextColor="#777"
+                style={styles.input}
+              />
+
+              <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
+                <FontAwesome name="send" size={18} color="#fff" />
+              </TouchableOpacity>
+            </View>
           </View>
         </SafeAreaView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 };
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -212,7 +200,6 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 14,
     paddingBottom: 10,
-    color: "white",
   },
 
   bubble: {

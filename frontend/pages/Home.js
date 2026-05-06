@@ -34,7 +34,8 @@ const checkAuth = async () => {
     let decoded;
     try {
       decoded = jwtDecode(token);
-    } catch {
+    } catch (e) {
+      console.error("JWT Decode Error:", e);
       await AsyncStorage.removeItem("token");
       setAuthStatus("expired");
       return;
