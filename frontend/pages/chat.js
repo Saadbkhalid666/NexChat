@@ -18,6 +18,8 @@ import {
   ScrollView,
 } from "react-native";
 import api from "../axios";
+import socket from "../socket";
+
 
 export const Chat = (props) => {
   const [name, setName] = useState("User");
