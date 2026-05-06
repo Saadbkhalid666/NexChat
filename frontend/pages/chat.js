@@ -16,12 +16,13 @@ import {
   Keyboard,
   Easing,
 } from "react-native";
-import api from "../axios"
+import api from "../axios";
 
 export const Chat = (props) => {
   const [name, setName] = useState("User");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const fade = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(30)).current;
@@ -30,7 +31,12 @@ export const Chat = (props) => {
     const init = async () => {
       const { selectedUser } = props.route.params;
       setName(selectedUser.username);
-      await fetchMessages();
+
+      const userData = await AsyncStorage.getItem("user");
+      const parsedUser = JSON.parse(userData);
+      setCurrentUser(parsedUser);
+
+      await fetchMessages(parsedUser, selectedUser);
     };
 
     init();
@@ -51,43 +57,61 @@ export const Chat = (props) => {
     ]).start();
   }, []);
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (me, other) => {
+    if (!me || !other) return;
     try {
-      const res = await api.post("/message/get");
-      const data = await res.json();
-      setMessages(data);
+      const token = await AsyncStorage.getItem("token");
+      const res = await api.get("/message/get", {
+        params: {
+          sender: me._id,
+          receiver: other._id,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setMessages(res.data);
     } catch (err) {
-      console.log("Fetch messages error:", err);
+      console.log("Fetch messages error:", err.response?.data || err.message);
     }
   };
 
   const sendMessage = async () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !currentUser) return;
 
     try {
-      await api.post("/messages/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const { selectedUser } = props.route.params;
+      const token = await AsyncStorage.getItem("token");
+
+      await api.post(
+        "/message/send",
+        {
+          sender: currentUser._id,
+          receiver: selectedUser._id,
+          message: message,
         },
-        body: JSON.stringify({
-          text: message,
-          sender: name,
-        }),
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       setMessage("");
-      await fetchMessages();
+      await fetchMessages(currentUser, selectedUser);
     } catch (err) {
-      console.log("Send message error:", err);
+      console.log("Send message error:", err.response?.data || err.message);
     }
   };
 
-  const renderItem = ({ item }) => (
-    <View style={[styles.bubble, item.mine ? styles.mine : styles.other]}>
-      <Text style={styles.bubbleText}>{item.text}</Text>
-    </View>
-  );
+  const renderItem = ({ item }) => {
+    const isMine = item.sender === currentUser?._id;
+    return (
+      <View style={[styles.bubble, isMine ? styles.mine : styles.other]}>
+        <Text style={styles.bubbleText}>{item.message}</Text>
+      </View>
+    );
+  };
 
   return (
     <KeyboardAvoidingView
@@ -121,7 +145,7 @@ export const Chat = (props) => {
             {/* MESSAGES */}
             <FlatList
               data={messages}
-              keyExtractor={(item) => item.id?.toString()}
+              keyExtractor={(item) => item._id?.toString() || Math.random().toString()}
               renderItem={renderItem}
               contentContainerStyle={styles.list}
               keyboardShouldPersistTaps="handled"
