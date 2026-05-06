@@ -36,6 +36,8 @@ const io = new Server(server, {
   }
 });
 
+ 
+
 global.onlineUsers = new Set();
 
 io.on("connection", (socket) => {
@@ -48,33 +50,33 @@ io.on("connection", (socket) => {
     io.emit("onlineUsers", Array.from(global.onlineUsers));
   }
 
-  socket.on("join", (userId) => {
-    socket.join(userId);
+  socket.on("join_room", (roomId) => {
+    socket.join(roomId);
   });
 
-  socket.on("sendMessage", async ({ roomID, message, sender, receiver }) => {
+  socket.on("sendMessage", async ({ roomId, message, sender, receiver }) => {
     try {
       const newMessage = new Message({
-        roomID,
+        roomId,
         message,
         sender,
-        receiver
+        receiver,
       });
 
       await newMessage.save();
 
-      io.to(roomID).emit("receiveMessage", newMessage);
+      io.to(roomId).emit("receiveMessage", newMessage);
     } catch (error) {
       console.log("Message Error:", error.message);
     }
   });
 
-  socket.on("typing", (roomID) => {
-    socket.to(roomID).emit("showTyping");
+  socket.on("typing", (roomId) => {
+    socket.to(roomId).emit("showTyping");
   });
 
-  socket.on("stopTyping", (roomID) => {
-    socket.to(roomID).emit("hideTyping");
+  socket.on("stopTyping", (roomId) => {
+    socket.to(roomId).emit("hideTyping");
   });
 
   socket.on("disconnect", () => {

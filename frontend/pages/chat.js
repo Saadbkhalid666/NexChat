@@ -48,23 +48,29 @@ export const Chat = (props) => {
     };
 
     init();
+useEffect(() => {
+  const setupSocket = async () => {
+    const s = await initSocket();
 
-    useEffect(()=>{
-      
-      socket.emit("join_room", roomId);
-      socket.on("receiveMessage", (msg) => {
-        setMessage(prev => [...prev, msg])
-      })
+    s.emit("join_room", roomId);
 
-      socket.on("showTyping", () => setIsTyping(true))
-      socket.on("hideTyping", () => setIsTyping(false))
+    s.on("receiveMessage", (msg) => {
+      setMessages((prev) => [...prev, msg]);
+    });
 
-      return () => {
-        socket.off("receiveMessage")
-        socket.off("showTyping")
-        socket.off("hideTyping")
-      }
-    }, [roomId])
+    s.on("showTyping", () => setIsTyping(true));
+    s.on("hideTyping", () => setIsTyping(false));
+  };
+
+  setupSocket();
+
+  return () => {
+    const s = getSocket();
+    s?.off("receiveMessage");
+    s?.off("showTyping");
+    s?.off("hideTyping");
+  };
+}, [roomId]);
 
     Animated.parallel([
       Animated.timing(fade, {
@@ -121,6 +127,12 @@ export const Chat = (props) => {
           },
         },
       );
+
+      socket.emit("sendMessage", {
+        sender: currentUser._id,
+        receiver: selectedUser._id,
+        message: message,
+      });
 
       setMessage("");
       await fetchMessages(currentUser, selectedUser);
