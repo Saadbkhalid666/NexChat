@@ -121,66 +121,66 @@ export const Chat = (props) => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={90}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <SafeAreaView style={styles.screen}>
-          {/* HEADER */}
-          <Animated.View
-            style={[
-              styles.header,
-              { opacity: fade, transform: [{ translateY: slide }] },
-            ]}
-          >
-            <View style={styles.profileWrap}>
-              <FontAwesome name="user" size={22} color="#111" />
-            </View>
-
-            <View>
-              <Text style={styles.name}>{name}</Text>
-              <Text style={styles.status}>Online</Text>
-            </View>
-
-            <TouchableOpacity
-              style={styles.callBtn}
-              onPress={() => props.navigation.navigate("Call")}
-            >
-              <FontAwesome name="phone" size={18} color="#fff" />
-            </TouchableOpacity>
-          </Animated.View>
-          <View style={{ flex: 1 }}>
-            {/* MESSAGES */}
-
-            <FlatList
-              ref={flatListRef}
-              data={messages}
-              keyExtractor={(item) =>
-                item._id?.toString() || Math.random().toString()
-              }
-              renderItem={renderItem}
-              contentContainerStyle={styles.list}
-              keyboardShouldPersistTaps="handled"
-              keyboardDismissMode="on-drag"
-            />
-            {/* INPUT */}
-            <View style={styles.inputBar}>
-              <TouchableOpacity>
-                <FontAwesome name="smile-o" size={22} color="#888" />
-              </TouchableOpacity>
-
-              <TextInput
-                value={message}
-                onChangeText={setMessage}
-                placeholder="Type message..."
-                placeholderTextColor="#777"
-                style={styles.input}
-              />
-
-              <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
-                <FontAwesome name="send" size={18} color="#fff" />
-              </TouchableOpacity>
-            </View>
+      <SafeAreaView style={styles.screen}>
+        {/* HEADER */}
+        <Animated.View
+          style={[
+            styles.header,
+            { opacity: fade, transform: [{ translateY: slide }] },
+          ]}
+        >
+          <View style={styles.profileWrap}>
+            <FontAwesome name="user" size={22} color="#111" />
           </View>
-        </SafeAreaView>
-      </TouchableWithoutFeedback>
+
+          <View>
+            <Text style={styles.name}>{name}</Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.callBtn}
+            onPress={() => props.navigation.navigate("Call")}
+          >
+            <FontAwesome name="phone" size={18} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
+        <View style={{ flex: 1 }}>
+          {/* MESSAGES */}
+
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item) =>
+              item._id?.toString() || Math.random().toString()
+            }
+            renderItem={renderItem}
+            contentContainerStyle={styles.list}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            onContentSizeChange={() =>
+              flatListRef.current?.scrollToOffset({ animated: true })
+            }
+          />
+          {/* INPUT */}
+          <View style={styles.inputBar}>
+            <TouchableOpacity>
+              <FontAwesome name="smile-o" size={22} color="#888" />
+            </TouchableOpacity>
+
+            <TextInput
+              value={message}
+              onChangeText={setMessage}
+              placeholder="Type message..."
+              placeholderTextColor="#777"
+              style={styles.input}
+            />
+
+            <TouchableOpacity style={styles.sendBtn} onPress={sendMessage}>
+              <FontAwesome name="send" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 };
@@ -188,7 +188,7 @@ export const Chat = (props) => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#0f0f10",
+    // backgroundColor: "#0f0f10",
   },
 
   header: {
@@ -215,11 +215,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
   },
-
-  status: {
-    color: "#1d3b00",
-    fontSize: 12,
-  },
+ 
 
   callBtn: {
     marginLeft: "auto",
@@ -238,14 +234,14 @@ const styles = StyleSheet.create({
 
   bubble: {
     maxWidth: "75%",
-    padding: 12,
-    borderRadius: 18,
+    padding: 10,
+    borderRadius: 6,
     marginVertical: 6,
   },
 
   mine: {
     alignSelf: "flex-end",
-    backgroundColor: "#86e72b",
+    backgroundColor: "lightgray",
   },
 
   other: {
@@ -261,8 +257,8 @@ const styles = StyleSheet.create({
     margin: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 18,
-    backgroundColor: "#1b1b1d",
+    borderRadius: 20,
+    backgroundColor: "lightgray",
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
