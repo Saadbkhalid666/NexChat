@@ -15,6 +15,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Easing,
+  ScrollView,
 } from "react-native";
 import api from "../axios";
 
@@ -23,6 +24,7 @@ export const Chat = (props) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const flatListRef = useRef(null);
 
   const fade = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(30)).current;
@@ -94,7 +96,7 @@ export const Chat = (props) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setMessage("");
@@ -116,7 +118,7 @@ export const Chat = (props) => {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior="padding"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={90}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -137,20 +139,27 @@ export const Chat = (props) => {
               <Text style={styles.status}>Online</Text>
             </View>
 
-            <TouchableOpacity style={styles.callBtn} onPress={() => props.navigation.navigate("Call")}>
+            <TouchableOpacity
+              style={styles.callBtn}
+              onPress={() => props.navigation.navigate("Call")}
+            >
               <FontAwesome name="phone" size={18} color="#fff" />
             </TouchableOpacity>
           </Animated.View>
           <View style={{ flex: 1 }}>
             {/* MESSAGES */}
+
             <FlatList
+              ref={flatListRef}
               data={messages}
-              keyExtractor={(item) => item._id?.toString() || Math.random().toString()}
+              keyExtractor={(item) =>
+                item._id?.toString() || Math.random().toString()
+              }
               renderItem={renderItem}
               contentContainerStyle={styles.list}
               keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
             />
-
             {/* INPUT */}
             <View style={styles.inputBar}>
               <TouchableOpacity>
