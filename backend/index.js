@@ -93,7 +93,7 @@ io.on("connection", (socket) => {
 
 app.use("/api/user", userRoutes);
 app.use("/api/message", messageRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/dashboard", adminRoutes);
 
 app.use((err, req, res, next) => {
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
