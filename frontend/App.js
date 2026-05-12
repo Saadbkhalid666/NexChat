@@ -14,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Chat } from "./pages/chat";
 import { UserProvider } from "./context/UserContext";
 import { Login } from "./pages/Login";
+import { Admin } from "./pages/admin";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -109,6 +110,14 @@ export default function App() {
               >{firstLetter}</Text>
             ),
           }}
+        />
+        <Stack.Screen
+        name="Admin"
+        component={Admin}
+        options={{
+          headerTitle: "Admin",
+          headerTitleStyle: { fontFamily: "Fugaz" },
+        }}
         />
          
       </Stack.Navigator>
