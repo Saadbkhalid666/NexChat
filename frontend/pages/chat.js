@@ -12,16 +12,14 @@ import {
   View,
   KeyboardAvoidingView,
   Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
   Easing,
-  ScrollView,
 } from "react-native";
 import api from "../axios";
 import { initSocket, getSocket } from "../socket";
+import { useCall } from "../useCall";
 
 export const Chat = (props) => {
-  const { id } = props.route.params.selectedUser;
+  const { selectedUser } = props.route.params;
   const [name, setName] = useState("User");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
@@ -29,7 +27,9 @@ export const Chat = (props) => {
   const flatListRef = useRef(null);
   const [isTyping, setIsTyping] = useState(false);
   const [roomId, setRoomId] = useState(null);
-  const [selectedMessageId,setSelectedMessageId] = useState(null)
+  const [selectedMessageId, setSelectedMessageId] = useState(null);
+
+  const { startCall, callState } = useCall();
 
   const fade = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(30)).current;
@@ -37,7 +37,6 @@ export const Chat = (props) => {
   // 1. Initial Load
   useEffect(() => {
     const init = async () => {
-      const { selectedUser } = props.route.params;
       setName(selectedUser.username);
 
       const userData = await AsyncStorage.getItem("user");
@@ -72,9 +71,10 @@ export const Chat = (props) => {
   useEffect(() => {
     if (!roomId) return;
 
-    const setupSocket = async () => {
-      const s = await initSocket();
+    let s;
 
+    const setupSocket = async () => {
+      s = await initSocket();
       s.emit("join_room", roomId);
 
       s.on("receiveMessage", (msg) => {
@@ -91,7 +91,6 @@ export const Chat = (props) => {
     setupSocket();
 
     return () => {
-      const s = getSocket();
       if (s) {
         s.off("receiveMessage");
         s.off("showTyping");
@@ -105,13 +104,8 @@ export const Chat = (props) => {
     try {
       const token = await AsyncStorage.getItem("token");
       const res = await api.get("/message/get", {
-        params: {
-          sender: me._id,
-          receiver: other._id,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        params: { sender: me._id, receiver: other._id },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setMessages(res.data);
     } catch (err) {
@@ -123,81 +117,77 @@ export const Chat = (props) => {
     setMessage(text);
     const s = getSocket();
     if (s && roomId) {
-      if (text.length > 0) {
-        s.emit("typing", roomId);
-      } else {
-        s.emit("stopTyping", roomId);
-      }
+      text.length > 0 ? s.emit("typing", roomId) : s.emit("stopTyping", roomId);
     }
   };
 
   const sendMessage = async () => {
     if (!message.trim() || !currentUser || !roomId) return;
-
     try {
-      const { selectedUser } = props.route.params;
       const s = getSocket();
-      
       if (s) {
         s.emit("sendMessage", {
-          roomId: roomId,
+          roomId,
           sender: currentUser._id,
           receiver: selectedUser._id,
-          message: message,
+          message,
         });
         s.emit("stopTyping", roomId);
       }
-
       setMessage("");
     } catch (err) {
       console.log("Send message error:", err);
     }
   };
-const deleteMessage = async (msgId) => {
-  try{
-    const token  = await AsyncStorage.getItem("token")
-    await api.delete(`/message/delete/${msgId}`,{
-      headers: {Authorization: `Bearer ${token}`}
-    })
-    setMessages((prev)=>prev.filter((m)=>m._id !== msgId))
-    setSelectedMessageId(null)
 
-  }
-  catch(err){
-    console.log("Delete message error:", err.response?.data || err.message);
-  }
-}
+  const deleteMessage = async (msgId) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      await api.delete(`/message/delete/${msgId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMessages((prev) => prev.filter((m) => m._id !== msgId));
+      setSelectedMessageId(null);
+    } catch (err) {
+      console.log("Delete message error:", err.response?.data || err.message);
+    }
+  };
+
+  const handleCallPress = async () => {
+    await startCall(selectedUser._id);
+    props.navigation.navigate("Call", { selectedUser });
+  };
 
   const renderItem = ({ item }) => {
-  const isMine = item.sender === currentUser?._id;
-  const isSelected = selectedMessageId === item._id;
+    const isMine = item.sender === currentUser?._id;
+    const isSelected = selectedMessageId === item._id;
 
-  return (
-    <TouchableOpacity
-      onPress={() =>
-        setSelectedMessageId(isSelected ? null : item._id)
-      }
-      activeOpacity={0.8}
-    >
-      <View style={[styles.bubble, isMine ? styles.mine : styles.other]}>
-        <Text style={styles.bubbleText}>{item.message}</Text>
-      </View>
+    return (
+      <TouchableOpacity
+        onPress={() => setSelectedMessageId(isSelected ? null : item._id)}
+        activeOpacity={0.8}
+      >
+        <View style={[styles.bubble, isMine ? styles.mine : styles.other]}>
+          <Text style={[styles.bubbleText, isMine && { color: "#111" }]}>
+            {item.message}
+          </Text>
+        </View>
 
-      {isSelected && (
-        <TouchableOpacity
-          onPress={() => deleteMessage(item._id)}
-          style={[
-            styles.deleteBtn,
-            { alignSelf: isMine ? "flex-end" : "flex-start" },
-          ]}
-        >
-          <FontAwesome name="trash" size={12} color="#fff" />
-          <Text style={styles.deleteTxt}>Delete</Text>
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
-  );
-};
+        {isSelected && (
+          <TouchableOpacity
+            onPress={() => deleteMessage(item._id)}
+            style={[
+              styles.deleteBtn,
+              { alignSelf: isMine ? "flex-end" : "flex-start" },
+            ]}
+          >
+            <FontAwesome name="trash" size={12} color="#fff" />
+            <Text style={styles.deleteTxt}>Delete</Text>
+          </TouchableOpacity>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <KeyboardAvoidingView
@@ -217,18 +207,23 @@ const deleteMessage = async (msgId) => {
             <FontAwesome name="user" size={22} color="#111" />
           </View>
 
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.name}>{name}</Text>
             {isTyping && <Text style={styles.status}>Typing...</Text>}
           </View>
 
           <TouchableOpacity
-            style={styles.callBtn}
-            onPress={() => props.navigation.navigate("Call")}
+            style={[
+              styles.callBtn,
+              callState !== "idle" && { backgroundColor: "#e74c3c" },
+            ]}
+            onPress={handleCallPress}
+            disabled={callState !== "idle"}
           >
             <FontAwesome name="phone" size={18} color="#fff" />
           </TouchableOpacity>
         </Animated.View>
+
         <View style={{ flex: 1 }}>
           {/* MESSAGES */}
           <FlatList
@@ -244,10 +239,11 @@ const deleteMessage = async (msgId) => {
             onContentSizeChange={() =>
               flatListRef.current?.scrollToEnd({ animated: true })
             }
-            onLayout={() => {
-              flatListRef.current?.scrollToEnd({animated:false})
-            }}
+            onLayout={() =>
+              flatListRef.current?.scrollToEnd({ animated: false })
+            }
           />
+
           {/* INPUT */}
           <View style={styles.inputBar}>
             <TouchableOpacity>
@@ -273,10 +269,7 @@ const deleteMessage = async (msgId) => {
 };
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    // backgroundColor: "#0f0f10",
-  },
+  screen: { flex: 1 },
 
   header: {
     margin: 14,
@@ -297,15 +290,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  name: {
-    color: "#111",
-    fontSize: 18,
-    fontWeight: "700",
-  },
- 
+  name: { color: "#111", fontSize: 18, fontWeight: "700" },
+  status: { color: "#333", fontSize: 12 },
 
   callBtn: {
-    marginLeft: "auto",
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -314,10 +302,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  list: {
-    paddingHorizontal: 14,
-    paddingBottom: 10,
-  },
+  list: { paddingHorizontal: 14, paddingBottom: 10 },
 
   bubble: {
     maxWidth: "75%",
@@ -326,19 +311,9 @@ const styles = StyleSheet.create({
     marginVertical: 6,
   },
 
-  mine: {
-    alignSelf: "flex-end",
-    backgroundColor: "lightgray",
-  },
-
-  other: {
-    alignSelf: "flex-start",
-    backgroundColor: "#222",
-  },
-
-  bubbleText: {
-    color: "#fff",
-  },
+  mine: { alignSelf: "flex-end", backgroundColor: "lightgray" },
+  other: { alignSelf: "flex-start", backgroundColor: "#222" },
+  bubbleText: { color: "#fff" },
 
   inputBar: {
     margin: 14,
@@ -351,11 +326,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 
-  input: {
-    flex: 1,
-    color: "#fff",
-    fontSize: 16,
-  },
+  input: { flex: 1, color: "#111", fontSize: 16 },
 
   sendBtn: {
     width: 40,
@@ -367,19 +338,16 @@ const styles = StyleSheet.create({
   },
 
   deleteBtn: {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 4,
-  backgroundColor: "#e74c3c",
-  paddingHorizontal: 10,
-  paddingVertical: 4,
-  borderRadius: 8,
-  marginTop: 3,
-  marginHorizontal: 10,
-},
-deleteTxt: {
-  color: "#fff",
-  fontSize: 12,
-  fontWeight: "600",
-},
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#e74c3c",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginTop: 3,
+    marginHorizontal: 10,
+  },
+
+  deleteTxt: { color: "#fff", fontSize: 12, fontWeight: "600" },
 });
