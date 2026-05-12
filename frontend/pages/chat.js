@@ -205,8 +205,11 @@ export const Chat = (props) => {
             keyboardShouldPersistTaps="handled"
             keyboardDismissMode="on-drag"
             onContentSizeChange={() =>
-              flatListRef.current?.scrollToOffset({ animated: true })
+              flatListRef.current?.scrollToEnd({ animated: true })
             }
+            onLayout={() => {
+              flatListRef.current?.scrollToEnd({animated:false})
+            }}
           />
           {/* INPUT */}
           <View style={styles.inputBar}>
