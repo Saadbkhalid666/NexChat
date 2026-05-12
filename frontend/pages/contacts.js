@@ -75,6 +75,7 @@ export const Contact = (props) => {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Contacts</Text>
         </View>
+        
 
         {loading ? (
           <View style={styles.centerContent}>

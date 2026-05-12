@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Chat } from "./pages/chat";
 import { UserProvider } from "./context/UserContext";
 import { Login } from "./pages/Login";
-import { Admin } from "./pages/admin";
+import { Admin, AdminPanel } from "./pages/adminPanel";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -73,7 +73,6 @@ export default function App() {
           options={{
             headerTitle: "Contacts",
             headerTitleStyle: { fontFamily: "Fugaz" },
-
             headerRight: () => (
               <Text
                 style={{
@@ -85,6 +84,7 @@ export default function App() {
                   paddingHorizontal: 10,
                   borderRadius: 20,
                 }}
+                
               >{firstLetter}</Text>
             ),
           }}
@@ -112,8 +112,8 @@ export default function App() {
           }}
         />
         <Stack.Screen
-        name="Admin"
-        component={Admin}
+        name="Admin Panel"
+        component={AdminPanel}
         options={{
           headerTitle: "Admin",
           headerTitleStyle: { fontFamily: "Fugaz" },
