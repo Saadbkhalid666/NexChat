@@ -29,6 +29,7 @@ export const Chat = (props) => {
   const flatListRef = useRef(null);
   const [isTyping, setIsTyping] = useState(false);
   const [roomId, setRoomId] = useState(null);
+  const [selectedMessageId,setSelectedMessageId] = useState(null)
 
   const fade = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(30)).current;
@@ -152,15 +153,51 @@ export const Chat = (props) => {
       console.log("Send message error:", err);
     }
   };
+const deleteMessage = async (msgId) => {
+  try{
+    const token  = await AsyncStorage.getItem("token")
+    await api.delete(`/message/delete/${msgId}`,{
+      headers: {Authorization: `Bearer ${token}`}
+    })
+    setMessages((prev)=>prev.filter((m)=>m._id !== msgId))
+    setSelectedMessageId(null)
+
+  }
+  catch(err){
+    console.log("Delete message error:", err.response?.data || err.message);
+  }
+}
 
   const renderItem = ({ item }) => {
-    const isMine = item.sender === currentUser?._id;
-    return (
+  const isMine = item.sender === currentUser?._id;
+  const isSelected = selectedMessageId === item._id;
+
+  return (
+    <TouchableOpacity
+      onPress={() =>
+        setSelectedMessageId(isSelected ? null : item._id)
+      }
+      activeOpacity={0.8}
+    >
       <View style={[styles.bubble, isMine ? styles.mine : styles.other]}>
         <Text style={styles.bubbleText}>{item.message}</Text>
       </View>
-    );
-  };
+
+      {isSelected && (
+        <TouchableOpacity
+          onPress={() => deleteMessage(item._id)}
+          style={[
+            styles.deleteBtn,
+            { alignSelf: isMine ? "flex-end" : "flex-start" },
+          ]}
+        >
+          <FontAwesome name="trash" size={12} color="#fff" />
+          <Text style={styles.deleteTxt}>Delete</Text>
+        </TouchableOpacity>
+      )}
+    </TouchableOpacity>
+  );
+};
 
   return (
     <KeyboardAvoidingView
@@ -328,4 +365,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+
+  deleteBtn: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
+  backgroundColor: "#e74c3c",
+  paddingHorizontal: 10,
+  paddingVertical: 4,
+  borderRadius: 8,
+  marginTop: 3,
+  marginHorizontal: 10,
+},
+deleteTxt: {
+  color: "#fff",
+  fontSize: 12,
+  fontWeight: "600",
+},
 });
