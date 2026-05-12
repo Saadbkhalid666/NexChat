@@ -12,7 +12,6 @@ import * as SplashScreen from "expo-splash-screen";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Chat } from "./pages/chat";
-import { CallScreen } from "./pages/callSceen";
 import { UserProvider } from "./context/UserContext";
 import { Login } from "./pages/Login";
 
@@ -111,11 +110,7 @@ export default function App() {
             ),
           }}
         />
-        <Stack.Screen
-          name="Call"
-          component={CallScreen}
-           headerShown={false}
-           />
+         
       </Stack.Navigator>
     </NavigationContainer>
     </UserProvider>

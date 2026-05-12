@@ -87,27 +87,8 @@ io.on("connection", (socket) => {
       io.emit("onlineUsers", Array.from(global.onlineUsers));
     }
   });
-
-  socket.on("call:initiate", ({to, from , offer}) => {
-    io.to(to).emit("call:incoming", {from, offer});
-  });
-
-  socket.on("call:accept", ({to, ans}) => {
-    io.to(to).emit("call:accepted", {ans})
-  });
-
-  socket.on("call:rejected", ({to}) => {
-    io.to(to).emit("call:rejected")
-  })
-
-  socket.on("call:end", ({to}) => {
-    io.to(to).emit("call:ended")
-  })
-
-  socket.on("ice:candidate", ({to, candidate}) => {
-    io.to(to).emit("ice:candidate", {candidate})
-  })
   
+
 });
 
 app.use("/api/user", userRoutes);
