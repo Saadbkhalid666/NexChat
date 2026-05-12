@@ -8,9 +8,9 @@ const router = express.Router()
 router.use(authMiddleware)
 router.use(adminMiddleware)
 
-router.get('/messages',getMessage)
-router.delete('/message/:id',deleteMessage)
-router.delete('/user/:id',deleteUser)
-router.get('/users',getUsers)
+router.get('/dashboard/messages',getMessage)
+router.delete('/dashboard/message/:id',deleteMessage)
+router.delete('/dashboard/user/:id',deleteUser)
+router.get('/dashboard/users',getUsers)
 
 module.exports = router
