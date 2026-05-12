@@ -18,23 +18,22 @@ import {
   ScrollView,
 } from "react-native";
 import api from "../axios";
-import socket from "../socket";
-
+import { initSocket, getSocket } from "../socket";
 
 export const Chat = (props) => {
-  const {id} = props.route.params.selectedUser
+  const { id } = props.route.params.selectedUser;
   const [name, setName] = useState("User");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const flatListRef = useRef(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [roomId, setRoomId] = useState(null);
 
   const fade = useRef(new Animated.Value(0)).current;
   const slide = useRef(new Animated.Value(30)).current;
 
-  const roomId = [currentUser.id, id].sort().join("_");
-
+  // 1. Initial Load
   useEffect(() => {
     const init = async () => {
       const { selectedUser } = props.route.params;
@@ -44,33 +43,13 @@ export const Chat = (props) => {
       const parsedUser = JSON.parse(userData);
       setCurrentUser(parsedUser);
 
+      const rId = [parsedUser._id, selectedUser._id].sort().join("_");
+      setRoomId(rId);
+
       await fetchMessages(parsedUser, selectedUser);
     };
 
     init();
-useEffect(() => {
-  const setupSocket = async () => {
-    const s = await initSocket();
-
-    s.emit("join_room", roomId);
-
-    s.on("receiveMessage", (msg) => {
-      setMessages((prev) => [...prev, msg]);
-    });
-
-    s.on("showTyping", () => setIsTyping(true));
-    s.on("hideTyping", () => setIsTyping(false));
-  };
-
-  setupSocket();
-
-  return () => {
-    const s = getSocket();
-    s?.off("receiveMessage");
-    s?.off("showTyping");
-    s?.off("hideTyping");
-  };
-}, [roomId]);
 
     Animated.parallel([
       Animated.timing(fade, {
@@ -87,6 +66,38 @@ useEffect(() => {
       }),
     ]).start();
   }, []);
+
+  // 2. Setup Socket
+  useEffect(() => {
+    if (!roomId) return;
+
+    const setupSocket = async () => {
+      const s = await initSocket();
+
+      s.emit("join_room", roomId);
+
+      s.on("receiveMessage", (msg) => {
+        setMessages((prev) => {
+          if (prev.find((m) => m._id === msg._id)) return prev;
+          return [...prev, msg];
+        });
+      });
+
+      s.on("showTyping", () => setIsTyping(true));
+      s.on("hideTyping", () => setIsTyping(false));
+    };
+
+    setupSocket();
+
+    return () => {
+      const s = getSocket();
+      if (s) {
+        s.off("receiveMessage");
+        s.off("showTyping");
+        s.off("hideTyping");
+      }
+    };
+  }, [roomId]);
 
   const fetchMessages = async (me, other) => {
     if (!me || !other) return;
@@ -107,37 +118,38 @@ useEffect(() => {
     }
   };
 
+  const handleTyping = (text) => {
+    setMessage(text);
+    const s = getSocket();
+    if (s && roomId) {
+      if (text.length > 0) {
+        s.emit("typing", roomId);
+      } else {
+        s.emit("stopTyping", roomId);
+      }
+    }
+  };
+
   const sendMessage = async () => {
-    if (!message.trim() || !currentUser) return;
+    if (!message.trim() || !currentUser || !roomId) return;
 
     try {
       const { selectedUser } = props.route.params;
-      const token = await AsyncStorage.getItem("token");
-
-      await api.post(
-        "/message/send",
-        {
+      const s = getSocket();
+      
+      if (s) {
+        s.emit("sendMessage", {
+          roomId: roomId,
           sender: currentUser._id,
           receiver: selectedUser._id,
           message: message,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      socket.emit("sendMessage", {
-        sender: currentUser._id,
-        receiver: selectedUser._id,
-        message: message,
-      });
+        });
+        s.emit("stopTyping", roomId);
+      }
 
       setMessage("");
-      await fetchMessages(currentUser, selectedUser);
     } catch (err) {
-      console.log("Send message error:", err.response?.data || err.message);
+      console.log("Send message error:", err);
     }
   };
 
@@ -170,6 +182,7 @@ useEffect(() => {
 
           <View>
             <Text style={styles.name}>{name}</Text>
+            {isTyping && <Text style={styles.status}>Typing...</Text>}
           </View>
 
           <TouchableOpacity
@@ -181,7 +194,6 @@ useEffect(() => {
         </Animated.View>
         <View style={{ flex: 1 }}>
           {/* MESSAGES */}
-
           <FlatList
             ref={flatListRef}
             data={messages}
@@ -204,7 +216,7 @@ useEffect(() => {
 
             <TextInput
               value={message}
-              onChangeText={setMessage}
+              onChangeText={handleTyping}
               placeholder="Type message..."
               placeholderTextColor="#777"
               style={styles.input}

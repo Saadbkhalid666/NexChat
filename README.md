@@ -66,7 +66,4 @@ A secure, real-time messaging app built with React Native.
 2.  **First Time Users**: Use the **Register** button to create an account.
 3.  **Existing Users**: Use the **Login** button to sign in.
 4.  Once logged in, you will be redirected to the **Contacts** list to start chatting.
-
-## License
-
-This project is licensed under the MIT License.
+ 
