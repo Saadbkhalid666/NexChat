@@ -5,7 +5,7 @@ const { getMessages, sendMessage } = require("../controllers/MessageController")
 const { getMessage, deleteMessage } = require("../controllers/dashboardController");
 
 router.get("/message/get", getMessage);
-router.delete("/delete/:id", deleteMessage);
+router.delete("/message/delete/:id", deleteMessage);
 
 
 router.get("/messages", getMessages);

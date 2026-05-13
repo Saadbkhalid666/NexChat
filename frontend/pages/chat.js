@@ -79,7 +79,6 @@ export const Chat = (props) => {
 
       s.on("receiveMessage", (msg) => {
         setMessages((prev) => {
-          if (!Array.isArray(prev)) return [msg];
           if (prev.find((m) => m._id === msg._id)) return prev;
           return [...prev, msg];
         });
@@ -114,7 +113,7 @@ export const Chat = (props) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setMessages(res.data.messages || []);
+      setMessages(res.data);
     } catch (err) {
       console.log("Fetch messages error:", err.response?.data || err.message);
     }
@@ -160,7 +159,7 @@ const deleteMessage = async (msgId) => {
     await api.delete(`/message/delete/${msgId}`,{
       headers: {Authorization: `Bearer ${token}`}
     })
-    setMessages((prev) => (Array.isArray(prev) ? prev.filter((m) => m._id !== msgId) : []));
+    setMessages((prev)=>prev.filter((m)=>m._id !== msgId))
     setSelectedMessageId(null)
 
   }
