@@ -1,10 +1,14 @@
 const express = require("express");
 const router = express.Router();
 
-const { sendMessage, getMessage, deleteMessage } = require("../controllers/MessageController.js");
+const { getMessages, sendMessage } = require("../controllers/MessageController");
+const { getMessage, deleteMessage } = require("../controllers/dashboardController");
 
-router.post("/send", sendMessage);
 router.get("/get", getMessage);
 router.delete("/delete/:id", deleteMessage);
+
+
+router.get("/messages", getMessages);
+router.post("/send", sendMessage);
 
 module.exports = router;

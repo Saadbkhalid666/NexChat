@@ -1,63 +1,39 @@
-const User = require("../models/UserSchema.js");
-const jwt = require("jsonwebtoken")
+const User = require("../models/UserSchema");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({
-        message: "All fields are required",
-      });
+      return res.status(400).json({ message: "Missing fields" });
     }
 
-    if (password.length < 8) {
-      return res.status(400).json({
-        message: "Password must be at least 8 characters long",
-      });
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ message: "User exists" });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({
-        message: "User already exists",
-      });
-    }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({
+    const user = await User.create({
       username: name,
       email,
-      password,
-      role:"admin"
+      password: hashedPassword,
+      role: "user"
     });
-
-    await newUser.save();
 
     const token = jwt.sign(
-      {
-        id: newUser._id,
-        username: newUser.username,
-        role: newUser.role,
-      },
+      { id: user._id },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "30d",
-      }
+      { expiresIn: "30d" }
     );
 
-    return res.status(201).json({
-      message: "User registered successfully",
-      token,
-      user: {
-        id: newUser._id,
-        username: newUser.username,
-        role: newUser.role,
-      },
-    });
-  } catch (e) {
-    return res.status(500).json({
-      message: e.message,
-    });
+    return res.status(201).json({ token, user });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 };
 
