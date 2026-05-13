@@ -1,8 +1,8 @@
 const express =  require('express')
-const authMiddleware = require('../middleware/authMiddleware')
-
 const { getMessage, deleteMessage, deleteUser, getUsers } = require('../controllers/dashboardController')
 const adminMiddleware = require('../middleware/adminMiddleware')
+const authMiddleware = require('../middleware/authMiddleware')
+
 const router = express.Router()
 
 router.use(authMiddleware)
