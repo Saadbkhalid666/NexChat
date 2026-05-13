@@ -3,7 +3,22 @@ const Message = require("../models/MessageSchema");
 
 const getMessage = async (req, res) => {
   try {
-    const messages = await Message.find();
+    const { sender, receiver } = req.query;
+
+    if (!sender || !receiver) {
+       const messages = await Message.find();
+       return res.status(200).json({
+        message: "Messages fetched successfully",
+        messages
+      });
+    }
+
+    const messages = await Message.find({
+      $or: [
+        { sender, receiver },
+        { sender: receiver, receiver: sender }
+      ]
+    }).sort({ createdAt: 1 });
 
     res.status(200).json({
       message: "Messages fetched successfully",
