@@ -209,8 +209,7 @@ function MsgRow({ item, onDelete }) {
     </View>
   );
 }
-
-/* ─── Main Panel ──────────────────────────────────────────── */
+ 
 export const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
