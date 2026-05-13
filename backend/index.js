@@ -23,7 +23,7 @@ connectDB();
 
 app.use(express.json());
 app.use(cors({
-  origin: "https://nexchat-ydoi.onrender.com",
+  origin: "*",
   methods: ["GET", "POST"]
 }));
 
