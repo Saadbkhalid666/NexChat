@@ -51,7 +51,7 @@ const checkAuth = async () => {
 
     // Token looks valid, verify user still exists on server
     try {
-      await api.get("/user/me", {
+      await api.get("/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAuthStatus("authenticated");

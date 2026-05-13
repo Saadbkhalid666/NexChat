@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const verifyToken = require("./middleware/verifyTokenMiddeware.js")
 
 // Load env FIRST
 dotenv.config();
@@ -18,6 +19,7 @@ const Message = require("./models/MessageSchema.js");
 const userRoutes = require("./routes/userRoutes.js");
 const messageRoutes = require("./routes/messageRoutes.js");
 const adminRoutes = require("./routes/dashboardRoutes.js");
+const User = require("./models/UserSchema.js");
 
 connectDB();
 
@@ -37,13 +39,13 @@ const io = new Server(server, {
 });
 
 
-app.get("/me", verifyToken, async (req, res) => {
+app.get("/api/me", verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select("-password");
     if (!user) return res.status(401).json({ message: "User not found" });
     res.json(user);
   } catch (err) {
-    res.status(401).json({ message: "Invalid token" });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
