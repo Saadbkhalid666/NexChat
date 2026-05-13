@@ -3,7 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {jwtDecode} from "jwt-decode";
 import { Image, Pressable, StyleSheet, Text, View, ActivityIndicator } from "react-native";
-
+import api from "../axios";
 export const Home = (props) => {
   const [authStatus, setAuthStatus] = useState("loading");
 
@@ -18,7 +18,6 @@ const checkAuth = async () => {
     const hasLaunched = await AsyncStorage.getItem("has_launched");
 
     if (!hasLaunched) {
-      // First time the user opens the app
       await AsyncStorage.setItem("has_launched", "true");
       setAuthStatus("first_time");
       return;
@@ -27,7 +26,8 @@ const checkAuth = async () => {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
-      setAuthStatus("expired");
+      // Had the app before but no token = was deleted or never logged in
+      setAuthStatus("first_time");
       return;
     }
 
@@ -35,25 +35,36 @@ const checkAuth = async () => {
     try {
       decoded = jwtDecode(token);
     } catch (e) {
-      console.log("JWT Decode Error:", e);
       await AsyncStorage.removeItem("token");
-      setAuthStatus("expired");
+      setAuthStatus("first_time");
       return;
     }
 
     const currentTime = Date.now() / 1000;
 
     if (decoded.exp < currentTime) {
+      // Token expired = they had an account, send to Login
       await AsyncStorage.removeItem("token");
       setAuthStatus("expired");
-    } else {
+      return;
+    }
+
+    // Token looks valid, verify user still exists on server
+    try {
+      await api.get("/user/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setAuthStatus("authenticated");
       props.navigation.replace("Contact");
+    } catch (err) {
+      // User was deleted from DB
+      await AsyncStorage.multiRemove(["token", "user"]);
+      setAuthStatus("first_time"); // ← sends to SignUp, not Login
     }
 
   } catch (err) {
     console.log("Auth Check Error:", err);
-    setAuthStatus("expired"); 
+    setAuthStatus("first_time");
   }
 };
 

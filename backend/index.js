@@ -36,7 +36,16 @@ const io = new Server(server, {
   }
 });
 
- 
+
+app.get("/me", verifyToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(401).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+});
 
 global.onlineUsers = new Set();
 
