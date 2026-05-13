@@ -3,32 +3,16 @@ const Message = require("../models/MessageSchema");
 
 const getMessage = async (req, res) => {
   try {
-    const { sender, receiver } = req.query;
-
-    if (!sender || !receiver) {
-       const messages = await Message.find();
-       return res.status(200).json({
-        message: "Messages fetched successfully",
-        messages
-      });
-    }
-
-    const messages = await Message.find({
-      $or: [
-        { sender, receiver },
-        { sender: receiver, receiver: sender }
-      ]
-    }).sort({ createdAt: 1 });
+    const messages = await Message.find();
 
     res.status(200).json({
       message: "Messages fetched successfully",
-      messages
+      messages,
     });
-
   } catch (error) {
     res.status(500).json({
       message: "Internal Server Error",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -41,13 +25,12 @@ const deleteMessage = async (req, res) => {
 
     res.status(200).json({
       message: "Message deleted successfully",
-      data: message
+      data: message,
     });
-
   } catch (error) {
     res.status(500).json({
       message: "Internal Server Error",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -60,13 +43,12 @@ const deleteUser = async (req, res) => {
 
     res.status(200).json({
       message: "User deleted successfully",
-      data: user
+      data: user,
     });
-
   } catch (error) {
     res.status(500).json({
       message: "Internal Server Error",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -77,14 +59,13 @@ const getUsers = async (req, res) => {
 
     res.status(200).json({
       message: "Users fetched successfully",
-      users
+      users,
     });
-
   } catch (error) {
     res.status(500).json({
       message: "Internal Server Error",
-      error: error.message
+      error: error.message,
     });
   }
 };
-module.exports = {getMessage,deleteMessage,deleteUser,getUsers}
+module.exports = { getMessage, deleteMessage, deleteUser, getUsers };

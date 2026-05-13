@@ -104,6 +104,7 @@ export const Chat = (props) => {
     if (!me || !other) return;
     try {
       const token = await AsyncStorage.getItem("token");
+      console.log("Fetching messages with params:", { sender: me._id, receiver: other._id });
       const res = await api.get("/message/get", {
         params: {
           sender: me._id,
@@ -113,7 +114,8 @@ export const Chat = (props) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      setMessages(res.data);
+      console.log(`Fetched ${res.data.length} messages for ${me._id} and ${other._id}`);
+      setMessages(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.log("Fetch messages error:", err.response?.data || err.message);
     }

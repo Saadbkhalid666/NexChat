@@ -1,39 +1,91 @@
-const Message = require("../models/MessageSchema");
+const Message = require('../models/MessageSchema.js')
+
+const sendMessages = async (req, res) => {
+    try {
+        const { sender, receiver, message } = req.body;
+
+        if (!sender || !receiver || !message) {
+            return res.status(400).json({
+                message: "All fields are required"
+            });
+        }
+
+        const newMessage = new Message({
+            sender,
+            receiver,
+            message
+        });
+
+        await newMessage.save();
+
+        res.status(201).json({
+            message: "Message sent successfully"
+        });
+
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        });
+    }
+}
 
 const getMessages = async (req, res) => {
   try {
     const { sender, receiver } = req.query;
-    let query = {};
-    if (sender && receiver) {
-      query = {
-        $or: [
-          { sender, receiver },
-          { sender: receiver, receiver: sender }
-        ]
-      };
+    console.log("Fetching messages for:", { sender, receiver });
+
+    if (!sender || !receiver) {
+      return res.status(400).json({
+        message: "All fields are required",
+      });
     }
-    const messages = await Message.find(query).sort({ createdAt: 1 });
-    return res.status(200).json({ messages });
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+
+    const messages = await Message.find({
+      $or: [
+        { sender, receiver },
+        { sender: receiver, receiver: sender }, 
+      ],
+    }).sort({ createdAt: 1 });
+
+    res.status(200).json(messages);
+  } catch (e) {
+    res.status(500).json({
+      message: e.message,
+    });
   }
 };
 
-const sendMessage = async (req, res) => {
-  try {
-    const { sender, receiver, message } = req.body;
+const deleteMessages = async (req,res) =>{
+    try {
+        const { id } = req.params;
 
-    if (!sender || !receiver || !message) {
-      return res.status(400).json({ message: "Missing fields" });
+        if (!id) {
+            return res.status(400).json({
+                message: "Message ID is required"
+            });
+        }
+
+        const message = await Message.findByIdAndDelete(id);
+
+        if (!message) {
+            return res.status(404).json({
+                message: "Message not found"
+            });
+        }
+
+        res.status(200).json({
+            message: "Message deleted successfully"
+        });
+
+    } catch (e) {
+        res.status(500).json({
+            message: e.message
+        });
     }
+}
 
-    const newMsg = await Message.create({ sender, receiver, message });
-
-    return res.status(201).json(newMsg);
-
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
-  }
-};
-
-module.exports = { getMessages, sendMessage };
+module.exports = { 
+    sendMessages,
+    getMessages,
+    deleteMessages
+}
