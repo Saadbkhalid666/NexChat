@@ -26,7 +26,6 @@ const checkAuth = async () => {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
-      // Had the app before but no token = was deleted or never logged in
       setAuthStatus("first_time");
       return;
     }
@@ -43,13 +42,11 @@ const checkAuth = async () => {
     const currentTime = Date.now() / 1000;
 
     if (decoded.exp < currentTime) {
-      // Token expired = they had an account, send to Login
       await AsyncStorage.removeItem("token");
       setAuthStatus("expired");
       return;
     }
 
-    // Token looks valid, verify user still exists on server
     try {
       await api.get("/me", {
         headers: { Authorization: `Bearer ${token}` },
@@ -57,9 +54,8 @@ const checkAuth = async () => {
       setAuthStatus("authenticated");
       props.navigation.replace("Contact");
     } catch (err) {
-      // User was deleted from DB
       await AsyncStorage.multiRemove(["token", "user"]);
-      setAuthStatus("first_time"); // ← sends to SignUp, not Login
+      setAuthStatus("first_time");  
     }
 
   } catch (err) {
@@ -100,7 +96,6 @@ const checkAuth = async () => {
         </Pressable>
       )}
 
-      {/* Optional fallback if navigation fails */}
       {authStatus === "authenticated" && (
         <Pressable
           style={({ pressed }) => [
