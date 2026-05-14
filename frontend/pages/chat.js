@@ -100,19 +100,23 @@ export const Chat = (props) => {
 
   const fetchMessages = async (me, other) => {
     if (!me || !other) return;
+
     try {
       const token = await AsyncStorage.getItem("token");
+
       const res = await api.get("/message/get", {
-  params: {
-    sender: me._id,
-    receiver: other._id,
-  },
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-});
-console.log("FETCHED:", res.data);
-setMessages(res.data.messages || []);
+        params: {
+          sender: me._id,
+          receiver: other._id,
+        },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("MESSAGES:", res.data);
+
+      setMessages(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.log("Fetch messages error:", err.response?.data || err.message);
     }
@@ -136,7 +140,7 @@ setMessages(res.data.messages || []);
     try {
       const { selectedUser } = props.route.params;
       const s = getSocket();
-      
+
       if (s) {
         s.emit("sendMessage", {
           roomId: roomId,
@@ -154,22 +158,20 @@ setMessages(res.data.messages || []);
   };
 
   const deleteMessage = async (msgId) => {
-    try{
-      const token  = await AsyncStorage.getItem("token")
-      await api.delete(`/message/delete/${msgId}`,{
-        headers: {Authorization: `Bearer ${token}`}
-      })
-      setMessages((prev)=>prev.filter((m)=>m._id !== msgId))
-      setSelectedMessageId(null)
-
-    }
-    catch(err){
+    try {
+      const token = await AsyncStorage.getItem("token");
+      await api.delete(`/message/delete/${msgId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMessages((prev) => prev.filter((m) => m._id !== msgId));
+      setSelectedMessageId(null);
+    } catch (err) {
       console.log("Delete message error:", err.response?.data || err.message);
     }
-  }
+  };
 
   const renderItem = ({ item }) => {
-    const isMine = item.sender === currentUser?._id;
+    const isMine = item.sender?.toString() === currentUser?._id?.toString();
     const isSelected = selectedMessageId === item._id;
 
     return (
@@ -178,27 +180,36 @@ setMessages(res.data.messages || []);
         activeOpacity={0.8}
         style={{ marginBottom: 12 }}
       >
-        <View style={[styles.messageRow, isMine ? styles.messageRowMine : styles.messageRowOther]}>
+        <View
+          style={[
+            styles.messageRow,
+            isMine ? styles.messageRowMine : styles.messageRowOther,
+          ]}
+        >
           {!isMine && (
-             <LinearGradient colors={['#ff9a9e', '#fecfef']} style={styles.tinyAvatar}>
-               <Text style={styles.tinyAvatarText}>{name.charAt(0).toUpperCase()}</Text>
-             </LinearGradient>
+            <LinearGradient
+              colors={["#ff9a9e", "#fecfef"]}
+              style={styles.tinyAvatar}
+            >
+              <Text style={styles.tinyAvatarText}>
+                {name.charAt(0).toUpperCase()}
+              </Text>
+            </LinearGradient>
           )}
           <View>
             {isMine ? (
               <LinearGradient
-                colors={['#4facfe', '#00f2fe']}
+                colors={["#4facfe", "#00f2fe"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={[styles.bubble, styles.bubbleMine]}
               >
                 <Text style={styles.bubbleTextMine}>{item.message}</Text>
-                 
               </LinearGradient>
             ) : (
               <View style={[styles.bubble, styles.bubbleOther]}>
                 <Text style={styles.bubbleTextOther}>{item.message}</Text>
-                 </View>
+              </View>
             )}
           </View>
         </View>
@@ -208,7 +219,11 @@ setMessages(res.data.messages || []);
             onPress={() => deleteMessage(item._id)}
             style={[
               styles.deleteBtn,
-              { alignSelf: isMine ? "flex-end" : "flex-start", marginLeft: isMine ? 0 : 36, marginRight: isMine ? 10 : 0 },
+              {
+                alignSelf: isMine ? "flex-end" : "flex-start",
+                marginLeft: isMine ? 0 : 36,
+                marginRight: isMine ? 10 : 0,
+              },
             ]}
           >
             <Ionicons name="trash-outline" size={14} color="#e74c3c" />
@@ -224,22 +239,27 @@ setMessages(res.data.messages || []);
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 90} 
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 90}
       >
         <LinearGradient
-          colors={['#fdfbfb', '#ebedee']}
+          colors={["#fdfbfb", "#ebedee"]}
           style={StyleSheet.absoluteFillObject}
         />
-        
+
         {/* HEADER */}
         <Animated.View
           style={[
             styles.header,
             { opacity: fade, transform: [{ translateY: slide }] },
           ]}
-        > 
-          <LinearGradient colors={['#ff9a9e', '#fecfef']} style={styles.profileWrap}>
-            <Text style={styles.profileInitials}>{name.charAt(0).toUpperCase()}</Text>
+        >
+          <LinearGradient
+            colors={["#ff9a9e", "#fecfef"]}
+            style={styles.profileWrap}
+          >
+            <Text style={styles.profileInitials}>
+              {name.charAt(0).toUpperCase()}
+            </Text>
           </LinearGradient>
 
           <View style={styles.headerInfo}>
@@ -250,25 +270,30 @@ setMessages(res.data.messages || []);
               <Text style={styles.statusOnline}>Online</Text>
             )}
           </View>
-</Animated.View>
+        </Animated.View>
 
         <View style={{ flex: 1 }}>
           {/* MESSAGES */}
           <FlatList
             ref={flatListRef}
             data={messages}
-            keyExtractor={(item) => item._id?.toString() || Math.random().toString()}
+            keyExtractor={(item) =>
+              item._id?.toString() || Math.random().toString()
+            }
             renderItem={renderItem}
             contentContainerStyle={styles.list}
             keyboardShouldPersistTaps="handled"
-            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-            onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
+            onContentSizeChange={() =>
+              flatListRef.current?.scrollToEnd({ animated: true })
+            }
+            onLayout={() =>
+              flatListRef.current?.scrollToEnd({ animated: false })
+            }
           />
-          
+
           {/* INPUT */}
           <View style={styles.inputContainerWrapper}>
             <View style={styles.inputBar}>
-
               <TextInput
                 value={message}
                 onChangeText={handleTyping}
@@ -278,11 +303,19 @@ setMessages(res.data.messages || []);
                 multiline
               />
 
-                <TouchableOpacity onPress={sendMessage}>
-                  <LinearGradient colors={['#4facfe', '#00f2fe']} style={styles.sendBtn}>
-                    <Ionicons name="send" size={18} color="#fff" style={{ marginLeft: 3 }} />
-                  </LinearGradient>
-                </TouchableOpacity>
+              <TouchableOpacity onPress={sendMessage}>
+                <LinearGradient
+                  colors={["#4facfe", "#00f2fe"]}
+                  style={styles.sendBtn}
+                >
+                  <Ionicons
+                    name="send"
+                    size={18}
+                    color="#fff"
+                    style={{ marginLeft: 3 }}
+                  />
+                </LinearGradient>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -294,7 +327,7 @@ setMessages(res.data.messages || []);
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#ebedee'
+    backgroundColor: "#ebedee",
   },
   header: {
     marginHorizontal: 15,
