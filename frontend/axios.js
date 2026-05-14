@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 const api = axios.create({
-    baseURL:"https://nexchat-ydoi.onrender.com/api"
+    baseURL:"https://nexchat-ydoi.onrender/api"
 })
 
 api.interceptors.request.use(async(config)=>{

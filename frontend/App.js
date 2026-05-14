@@ -51,11 +51,9 @@ function AvatarMenu({ firstLetter }) {
     if (isAdmin) {
       navigation.navigate("Admin Panel");
     } else {
-      Alert.alert(
-        "Access Denied",
-        "You do not have admin privileges.",
-        [{ text: "OK" }]
-      );
+      Alert.alert("Access Denied", "You do not have admin privileges.", [
+        { text: "OK" },
+      ]);
     }
   };
 
@@ -77,7 +75,10 @@ function AvatarMenu({ firstLetter }) {
         onRequestClose={() => setVisible(false)}
       >
         {/* Full-screen invisible backdrop */}
-        <Pressable style={StyleSheet.absoluteFill} onPress={() => setVisible(false)} />
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={() => setVisible(false)}
+        />
 
         {/* Dropdown card positioned below the avatar */}
         {btnLayout && (
@@ -99,9 +100,7 @@ function AvatarMenu({ firstLetter }) {
               <Text style={styles.menuIcon}>🛡️</Text>
               <View>
                 <Text style={styles.menuLabel}>Admin Panel</Text>
-                {!isAdmin && (
-                  <Text style={styles.menuSub}>Not authorized</Text>
-                )}
+                {!isAdmin && <Text style={styles.menuSub}>Not authorized</Text>}
               </View>
               {isAdmin && <Text style={styles.menuArrow}>›</Text>}
             </TouchableOpacity>
@@ -195,7 +194,6 @@ export default function App() {
     </UserProvider>
   );
 }
-
 
 const styles = StyleSheet.create({
   avatar: {

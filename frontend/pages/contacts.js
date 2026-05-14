@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { UserContext } from "../context/UserContext";
 import api from "../axios";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 
 export const Contact = (props) => {
   const { user, setSelectedUser } = useContext(UserContext);
@@ -50,7 +52,7 @@ export const Contact = (props) => {
     });
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item, index }) => (
     <Pressable
       style={({ pressed }) => [
         styles.contactCard,
@@ -58,31 +60,41 @@ export const Contact = (props) => {
       ]}
       onPress={() => handleUserClick(item)}
     >
-      <View style={styles.avatar}>
+      <LinearGradient
+        colors={index % 2 === 0 ? ['#4facfe', '#00f2fe'] : ['#ff9a9e', '#fecfef']}
+        style={styles.avatar}
+      >
         <Text style={styles.avatarText}>
           {item.username ? item.username.charAt(0).toUpperCase() : "?"}
         </Text>
-      </View>
+      </LinearGradient>
       <View style={styles.contactInfo}>
         <Text style={styles.contactName}>{item.username}</Text>
+        <Text style={styles.contactSub}>Tap to start chatting</Text>
       </View>
+      <Ionicons name="chatbubble-ellipses-outline" size={24} color="#ccc" style={styles.chatIcon} />
     </Pressable>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <LinearGradient
+        colors={['#fdfbfb', '#ebedee']}
+        style={StyleSheet.absoluteFillObject}
+      />
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Contacts</Text>
+          <Text style={styles.headerTitle}>Messages</Text>
+          <Text style={styles.headerSubtitle}>Connect with your friends</Text>
         </View>
-        
 
         {loading ? (
           <View style={styles.centerContent}>
-            <ActivityIndicator size="large" color="#86e72bff" />
+            <ActivityIndicator size="large" color="#4facfe" />
           </View>
         ) : users.length === 0 ? (
           <View style={styles.centerContent}>
+            <Ionicons name="people-outline" size={64} color="#ccc" style={{ marginBottom: 15 }} />
             <Text style={styles.emptyText}>No contacts found.</Text>
           </View>
         ) : (
@@ -102,23 +114,27 @@ export const Contact = (props) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
   },
   container: {
     flex: 1,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eaeaea",
-    marginBottom: 10,
+    paddingHorizontal: 25,
+    paddingTop: 20,
+    paddingBottom: 15,
+    backgroundColor: "transparent",
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 34,
     fontFamily: "Fugaz",
-    color: "#333",
+    color: "#1a1a1a",
+    letterSpacing: 1,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#666",
+    fontFamily: "Fugaz",
+    marginTop: 4,
   },
   centerContent: {
     flex: 1,
@@ -131,42 +147,46 @@ const styles = StyleSheet.create({
     fontFamily: "Fugaz",
   },
   listContainer: {
-    paddingHorizontal: 15,
-    paddingBottom: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    paddingTop: 10,
   },
   contactCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 12,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.5)",
   },
   contactCardPressed: {
-    opacity: 0.7,
-    backgroundColor: "#f0f0f0",
+    transform: [{ scale: 0.98 }],
+    backgroundColor: "rgba(255, 255, 255, 1)",
+    shadowOpacity: 0.1,
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#86e72bff",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 15,
+    marginRight: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
   },
   avatarText: {
-    fontSize: 22,
+    fontSize: 24,
     color: "#fff",
-    fontWeight: "bold",
     fontFamily: "Fugaz",
   },
   contactInfo: {
@@ -175,8 +195,16 @@ const styles = StyleSheet.create({
   },
   contactName: {
     fontSize: 18,
-    color: "#333",
-    fontWeight: "600",
+    color: "#2c3e50",
     fontFamily: "Fugaz",
+    marginBottom: 4,
+  },
+  contactSub: {
+    fontSize: 13,
+    color: "#8e9eab",
+    fontFamily: "Fugaz",
+  },
+  chatIcon: {
+    marginLeft: 10,
   },
 });
