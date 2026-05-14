@@ -103,15 +103,16 @@ export const Chat = (props) => {
     try {
       const token = await AsyncStorage.getItem("token");
       const res = await api.get("/message/get", {
-        params: {
-          sender: me._id,
-          receiver: other._id,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setMessages(Array.isArray(res.data) ? res.data : []);
+  params: {
+    sender: me._id,
+    receiver: other._id,
+  },
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+console.log("FETCHED:", res.data);
+setMessages(res.data.messages || []);
     } catch (err) {
       console.log("Fetch messages error:", err.response?.data || err.message);
     }
